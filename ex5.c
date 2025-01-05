@@ -89,10 +89,15 @@ void songID(Song **songCollected, int songCount)
 int songSelect(char action[], int songCount) {
     int chosen = INVALID;
     printf("choose a song to %s, or 0 to quit:\n", action);
-    if (scanf(" %d", &chosen) != 1) {
+    if (scanf(" %d", &chosen) != 1 && songCount != 0) {
+        scanf("%*[^\n]");
+        scanf("%*c");
+        printf("Invalid option\n");
         return INVALID;
     }
-    if (chosen <= QUIT || chosen > songCount) {
+    if (chosen <= QUIT || songCount == 0 || chosen > songCount) {
+        scanf("%*[^\n]");
+        scanf("%*c");
         return BACK;
     }
     return chosen - 1;
@@ -111,6 +116,8 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
     printf("%d. Back to main menu\n", menuNumber);
 
     if (scanf(" %d", &chosen) != 1 || chosen < 1 || chosen > menuNumber) {
+        scanf("%*[^\n]");
+        scanf("%*c");
         return INVALID;
     }
 
@@ -132,6 +139,7 @@ void delSong(Song ***songCollected, int *songCount, int songIndex) {
     *songCollected = (Song **)realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
     (*songCount)--;
 }
+
 
 void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex) {
     freePlaylist((*playlistCollected)[playlistIndex]);
@@ -304,12 +312,10 @@ void playlistGoTo(Playlist *playlist)
                 while ((chosen = songSelect("play", playlistCurrent->songsNum)) != INVALID && chosen != BACK) {
                     playSong(chosen, playlistCurrent->songs);
                 }
-                // printMenu = 1;
                 break;
             }
             case ADD:
                 addSong(&playlistCurrent->songs, &playlistCurrent->songsNum);
-                // printMenu = 1;
                 break;
             case DELETE: {
                 songID(playlistCurrent->songs, playlistCurrent->songsNum);
@@ -325,8 +331,9 @@ void playlistGoTo(Playlist *playlist)
                 playAllSong(playlistCurrent->songs, playlistCurrent->songsNum);
                 break;
             default:
+                scanf("%*[^\n]");
+                scanf("%*c");
                 printf("Invalid option\n");
-                // printMenu = 1;
                 break;
         }
     printMenu = 1;
