@@ -56,12 +56,26 @@ void freePlaylist(Playlist *p) {
 }
 
 
-int songID(char action[], Song **songCollected, int songCount)
+void playSong(int songIndex, Song **songCollected) {
+    printf("Now playing %s:\n", songCollected[songIndex]->title);
+    printf("$ %s $\n", songCollected[songIndex]->lyrics);
+    // songCollected[songIndex]->streams
+}
+
+
+void playAllSong(Song **songCollected, int songCount) {
+    for (int songIndex = 0; songIndex < songCount; songIndex++) {
+        playSong(songIndex, songCollected );
+        
+        
+    }
+}
+
+
+void songID(Song **songCollected, int songCount)
 {
     int currentIndex = INVALID;
     int menuNumber = 0;
-    int chosen = INVALID;
-
     for (menuNumber = 1; menuNumber <= songCount; menuNumber++) {
         currentIndex = menuNumber - 1;
         printf("%d. Title: %s\n", menuNumber, songCollected[currentIndex]->title);
@@ -69,6 +83,11 @@ int songID(char action[], Song **songCollected, int songCount)
         printf("   Year: %d\n", songCollected[currentIndex]->year);
         printf("   Streams: %d\n", songCollected[currentIndex]->streams);
     }
+}
+
+
+int songSelect(char action[], int songCount) {
+    int chosen = INVALID;
     printf("choose a song to %s, or 0 to quit:\n", action);
     if (scanf(" %d", &chosen) != 1) {
         return INVALID;
@@ -281,16 +300,21 @@ void playlistGoTo(Playlist *playlist)
             case BACK:
                 break;
             case VIEW: {
-                songID("play", playlistCurrent->songs, playlistCurrent->songsNum);
+                songID(playlistCurrent->songs, playlistCurrent->songsNum);
+                while ((chosen = songSelect("play", playlistCurrent->songsNum)) != INVALID && chosen != BACK) {
+                    playSong(chosen, playlistCurrent->songs);
+                }
+                // printMenu = 1;
                 break;
             }
             case ADD:
                 addSong(&playlistCurrent->songs, &playlistCurrent->songsNum);
+                // printMenu = 1;
                 break;
             case DELETE: {
-                int songIndex = songID("delete", playlistCurrent->songs, playlistCurrent->songsNum);
-                if (songIndex != INVALID && songIndex != BACK) {
-                    delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, songIndex);
+                songID(playlistCurrent->songs, playlistCurrent->songsNum);
+                if ((chosen = songSelect("delete", playlistCurrent->songsNum)) != INVALID && chosen != BACK) {
+                    delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, chosen);
                 }
                 break;
             }
@@ -298,13 +322,14 @@ void playlistGoTo(Playlist *playlist)
                 // TODO: sort
                 break;
             case PLAY:
-                // TODO: play all
+                playAllSong(playlistCurrent->songs, playlistCurrent->songsNum);
                 break;
             default:
                 printf("Invalid option\n");
-                printMenu = 1;
+                // printMenu = 1;
                 break;
         }
+    printMenu = 1;
     } while (chosen != BACK);
 }
 
