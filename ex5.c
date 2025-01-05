@@ -56,7 +56,7 @@ void freePlaylist(Playlist *p) {
 }
 
 
-int songID(char action, Song **songCollected, int songCount)
+int songID(char action[], Song **songCollected, int songCount)
 {
     int currentIndex = INVALID;
     int menuNumber = 0;
@@ -64,10 +64,10 @@ int songID(char action, Song **songCollected, int songCount)
 
     for (menuNumber = 1; menuNumber <= songCount; menuNumber++) {
         currentIndex = menuNumber - 1;
-        printf("%d. Title:\n%s\n", menuNumber, songCollected[currentIndex]->title);
-        printf("   Artist:\n%s\n", songCollected[currentIndex]->artist);
-        printf("   Year:\n%d\n", songCollected[currentIndex]->year);
-        printf("   Streams:\n%d\n", songCollected[currentIndex]->streams);
+        printf("%d. Title: %s\n", menuNumber, songCollected[currentIndex]->title);
+        printf("   Artist: %s\n", songCollected[currentIndex]->artist);
+        printf("   Year: %d\n", songCollected[currentIndex]->year);
+        printf("   Streams: %d\n", songCollected[currentIndex]->streams);
     }
     printf("choose a song to %s, or 0 to quit:\n", action);
     if (scanf(" %d", &chosen) != 1) {
@@ -148,7 +148,7 @@ void addSong(Song ***songCollected, int *songCount) {
 
     // get year of release
     printf("Year of release:\n");
-    scanf("%d", &newSong->year);
+    scanf(" %d", &newSong->year);
 
     // get lyrics
     printf("Lyrics:\n");
@@ -183,7 +183,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
         return;
     }
 
-    while (scanf("%63[^\n]", playlistName + len) == 1) {
+    while (scanf(" %63[^\n]", playlistName + len) == 1) {
         size_t buffer_len = strlen(playlistName + len);
         len += buffer_len;
 
@@ -331,7 +331,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
             );
         }
 
-        option = scanf("%d", &chosen);
+        option = scanf(" %d", &chosen);
         if (option == EOF || chosen == KILL) {
             return KILL;
         }
