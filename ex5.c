@@ -9,6 +9,7 @@ Assignment: ex5
 
 #define GO_HOME -2
 #define INVALID -1
+#define QUIT 0
 #define VIEW 1
 #define ADD 2
 #define DELETE 3
@@ -36,11 +37,6 @@ typedef struct playlistGroup {
     int playlistCount;
 } playlistGroup;
 
-int playlistID(Playlist **playlistCollected, int playlistCount);
-void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex);
-void addPlaylist(Playlist ***playlistCollected, int *playlistCount);
-void playlistGoTo(Playlist *playlist);
-int home(Playlist ***playlistCollected, int *playlistCount);
 
 void freeSong(Song *song) {
     free(song->title);
@@ -48,6 +44,7 @@ void freeSong(Song *song) {
     free(song->lyrics);
     free(song);
 }
+
 
 void freePlaylist(Playlist *p) {
     for (int i = 0; i < p->songsNum; i++) {
@@ -57,6 +54,31 @@ void freePlaylist(Playlist *p) {
     free(p->name);
     free(p);
 }
+
+
+int songID(Song **songCollected, int songCount)
+{
+    int currentIndex = INVALID;
+    int menuNumber = 0;
+    int chosen = INVALID;
+
+    for (menuNumber = 1; menuNumber <= songCount; menuNumber++) {
+        currentIndex = menuNumber - 1;
+        printf("%d. Title:\n%s\n", menuNumber, songCollected[currentIndex]->title);
+        printf("   Artist:\n%s\n", songCollected[currentIndex]->artist);
+        printf("   Year:\n%d\n", songCollected[currentIndex]->year);
+        printf("   Streams:\n%d\n", songCollected[currentIndex]->streams);
+    }
+    printf("choose a song to play, or 0 to quit:\n");
+    if (scanf(" %d", &chosen) != 1) {
+        return INVALID;
+    }
+    if (chosen <= QUIT || chosen > songCount) {
+        return BACK;
+    }
+    return chosen - 1;
+}
+
 
 int playlistID(Playlist **playlistCollected, int playlistCount)
 {
@@ -69,7 +91,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
     }
     printf("%d. Back to main menu\n", menuNumber);
 
-    if (scanf("%d", &chosen) != 1 || chosen < 1 || chosen > menuNumber) {
+    if (scanf(" %d", &chosen) != 1 || chosen < 1 || chosen > menuNumber) {
         return INVALID;
     }
 
@@ -78,6 +100,18 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
     }
 
     return chosen - 1;
+}
+
+
+void delSong(Song ***songCollected, int *songCount, int songIndex) {
+    freeSong((*songCollected)[songIndex]);
+
+    for (int i = songIndex; i < *songCount - 1; i++) {
+        (*songCollected)[i] = (*songCollected)[i + 1];
+    }
+
+    *songCollected = (Song **)realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
+    (*songCount)--;
 }
 
 void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex) {
@@ -91,9 +125,75 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
     (*playlistCount)--;
 }
 
+
+void addSong(Song ***songCollected, int *songCount) {
+    printf("Enter song's details:\n");
+    char *songName = NULL;
+    size_t len = 0;
+    size_t size = 64;
+    songName = calloc(size, sizeof(char));
+    if (!songName) {
+        printf("Invalid option\n");
+        return;
+    }
+
+    while (scanf("%63[^\n]", songName + len) == 1) {
+        size_t buffer_len = strlen(songName + len);
+        len += buffer_len;
+
+        if (len + 1 >= size) {
+            size *= 2;
+            char *new_songName = realloc(songName, size);
+            if (!new_songName) {
+                printf("Invalid option\n");
+                free(songName);
+                return;
+            }
+            songName = new_songName;
+        }
+
+        if (buffer_len < 63) {
+            break;
+        }
+    }
+
+    if (len == 0) {
+        printf("INVALID\n");
+        free(songName);
+        return;
+    }
+
+    songName[len] = '\0';
+
+    Song *newSong = (Song *)malloc(sizeof(Song));
+    if (!newSong) {
+        printf("Invalid option\n");
+        free(songName);
+        return;
+    }
+    newSong->title = strdup(songName);
+    newSong->artist = NULL;
+    newSong->year = 0;
+    newSong->lyrics = NULL;
+    newSong->streams = 0;
+
+    *songCollected = (Song **)realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
+    if (!*songCollected) {
+        printf("Invalid option\n");
+        free(newSong->title);
+        free(newSong);
+        free(songName);
+        return;
+    }
+    (*songCollected)[*songCount] = newSong;
+    (*songCount)++;
+
+    free(songName);
+}
+
+
 void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     printf("Enter playlist's name:\n");
-    // AbSOloot baNgerrZ$
     char *playlistName = NULL;
     size_t len = 0;
     size_t size = 64;
@@ -155,6 +255,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     free(playlistName);
 }
 
+
 void playlistGoTo(Playlist *playlist)
 {
     int chosen = BACK;
@@ -181,7 +282,7 @@ void playlistGoTo(Playlist *playlist)
                 BACK
             );
         }
-        option = scanf("%d", &chosen);
+        option = scanf(" %d", &chosen);
         if (option == EOF || chosen == BACK) {
             return;
         }
@@ -200,25 +301,24 @@ void playlistGoTo(Playlist *playlist)
             case BACK:
                 break;
             case VIEW: {
-                for (int i = 0; i < playlistCurrent->songsNum; i++) {
-                    printf("%d. Title:\n%s\n", i + 1, playlistCurrent->songs[i]->title);
-                    printf("   Artist:\n%s\n", playlistCurrent->songs[i]->artist);
-                    printf("   Year:\n%d\n", playlistCurrent->songs[i]->year);
-                    printf("   Streams:\n%d\n", playlistCurrent->songs[i]->streams);
-                }
+                songID(playlistCurrent->songs, playlistCurrent->songsNum);
                 break;
             }
             case ADD:
-                
+                addSong(&playlistCurrent->songs, &playlistCurrent->songsNum);
                 break;
-            case DELETE:
-
+            case DELETE: {
+                int songIndex = songID(playlistCurrent->songs, playlistCurrent->songsNum);
+                if (songIndex != INVALID && songIndex != BACK) {
+                    delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, songIndex);
+                }
                 break;
+            }
             case SORT:
-
+                // TODO: sort
                 break;
             case PLAY:
-
+                // TODO: play all
                 break;
             default:
                 printf("Invalid option\n");
@@ -294,6 +394,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
     } while (chosen != KILL);
     return chosen;
 }
+
 
 int main()
 {
