@@ -386,8 +386,6 @@ void playlistGoTo(Playlist *playlist)
                 playAllSong(playlistCurrent->songs, playlistCurrent->songsNum);
                 break;
             default:
-                // scanf("%*[^\n]");
-                // scanf("%*c");
                 printf("Invalid option\n");
                 break;
         }
