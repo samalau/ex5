@@ -393,9 +393,10 @@ void playlistGoTo(Playlist *playlist)
 
 int home(Playlist ***playlistCollected, int *playlistCount)
 {
-    int chosen = KILL;
-    int option = EOF;
-    int printMenu = 1;
+    int
+        chosen = INVALID,
+        option = INVALID,
+        printMenu = 1;
 
     do {
         if (printMenu) {
@@ -414,7 +415,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
         }
 
         option = scanf(" %d", &chosen);
-        if (option == EOF || chosen == KILL) {
+
+        if (chosen == KILL) {
             return KILL;
         }
 
