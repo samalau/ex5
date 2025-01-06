@@ -87,19 +87,28 @@ void songID(Song **songCollected, int songCount)
 
 
 int songSelect(char action[], int songCount) {
-    int chosen = INVALID;
-    printf("choose a song to %s, or 0 to quit:\n", action);
-    if (scanf(" %d", &chosen) != 1 && songCount != 0) {
+    int
+        chosen = INVALID,
+        input = INVALID;
+
+    do {
+        printf("choose a song to %s, or 0 to quit:\n", action);
+        input = scanf(" %d", &chosen);
+
         scanf("%*[^\n]");
         scanf("%*c");
-        printf("Invalid option\n");
-        return INVALID;
-    }
-    if (chosen <= QUIT || songCount == 0 || chosen > songCount) {
-        scanf("%*[^\n]");
-        scanf("%*c");
-        return BACK;
-    }
+
+        // TODO: input == EOF;
+
+        if (songCount == 0 || chosen == QUIT) {
+            return BACK;
+        }
+        if (input != 1 || chosen < 0 || chosen > songCount) {
+            printf("Invalid option\n");
+            chosen = INVALID;
+        }
+    } while (songCount > 0 && chosen == INVALID);
+    
     return chosen - 1;
 }
 
@@ -201,32 +210,6 @@ int readIntegerInput(const char* prompt) {
     return value;
 }
 
-// int readIntegerInput(const char* prompt) {
-//     int value;
-//     int input;
-//     char confirmInt;
-//     do {
-//         printf("%s", prompt);
-//         input = scanf("%*[^0-9]%d%c", &value, &confirmInt);
-//         if (input != 2 || (confirmInt != '\n' && confirmInt != ' ')) {
-//             printf("Invalid option\n");
-//             while (scanf("%*[^\n]") != EOF);
-//             scanf("%*c");
-//         } else {
-//             while (confirmInt == ' ') {
-//                 input = scanf("%c", &confirmInt);
-//                 if (confirmInt != ' ' && confirmInt != '\n') {
-//                     printf("Invalid option\n");
-//                     while (scanf("%*[^\n]") != EOF);
-//                     scanf("%*c");
-//                     input = INVALID;
-//                     break;
-//                 }
-//             }
-//         }
-//     } while (input != 2 || confirmInt != '\n');
-//     return value;
-// }
 
 void addSong(Song ***songCollected, int *songCount) {
     printf("Enter song's details:\n");
