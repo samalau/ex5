@@ -3,10 +3,6 @@ Name: Samantha Newmark
 ID: 346587629
 Assignment: ex5
 *******************/
-
-// TODO: input == EOF;
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,10 +14,10 @@ Assignment: ex5
 #define PLAY 5
 #define BACK 6
 
-#define INITIAL_PLAYLIST_NAME_SIZE 4
+#define INITIAL_BUFFER_SIZE 4
 #define EXPANSION_FACTOR 2
 #define SHRINK_THRESHOLD_FACTOR 2
-#define MAX_SCANF_INPUT (INITIAL_PLAYLIST_NAME_SIZE - 1)
+#define MAX_SCANF_INPUT (INITIAL_BUFFER_SIZE - 1)
 
 #define SORT_BY_YEAR 1
 #define SORT_ASCEND_STREAM 2
@@ -55,6 +51,44 @@ typedef struct playlistGroup {
     int playlistCount;
 } playlistGroup;
 
+void freeSong(Song *song);
+void freePlaylist(Playlist *p);
+
+char *getlineCustom(char **buffer, size_t *size);
+char *strdupCustom(const char *s);
+
+char* readStringInput(const char* prompt);
+int readIntegerInput(const char* prompt);
+
+int compareByYear(const void *a, const void *b);
+int compareByStreamAscend(const void *a, const void *b);
+int compareByStreamDescend(const void *a, const void *b);
+int compareByTitle(const void *a, const void *b);
+
+void insertionSort(Song **songs, int n, int (*comparator)(const void *, const void *));
+Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*comparator)(const void *, const void *));
+Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void *));
+void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void *));
+void songSort (Playlist *playlist);
+
+void playSong(int songIndex, Song **songCollected);
+void playAllSong(Song **songCollected, int songCount);
+
+void songID(Song **songCollected, int songCount);
+int songSelect(char action[], int songCount);
+
+int playlistID(Playlist **playlistCollected, int playlistCount);
+
+void delSong(Song ***songCollected, int *songCount, int songIndex);
+void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex);
+
+void addSong(Song ***songCollected, int *songCount);
+void addPlaylist(Playlist ***playlistCollected, int *playlistCount);
+
+void playlistGoTo(Playlist *playlist);
+
+int home(Playlist ***playlistCollected, int *playlistCount);
+
 
 void freeSong(Song *song)
 {
@@ -76,6 +110,85 @@ void freePlaylist(Playlist *p)
 }
 
 
+char *getlineCustom(char **buffer, size_t *size)
+{
+    if (*buffer == NULL) {
+        *size = INITIAL_BUFFER_SIZE;
+        *buffer = malloc(*size);
+        if (!*buffer) {
+            return NULL;
+        }
+    }
+
+    size_t len = 0;
+    int inputRead;
+    
+    while (1) {
+        if ((len + MAX_SCANF_INPUT) >= *size) {
+            *size *= EXPANSION_FACTOR;
+            char *newBuffer = realloc(*buffer, *size);
+            if (!newBuffer) {
+                free(*buffer);
+                *buffer = NULL;
+                return NULL;
+            }
+            *buffer = newBuffer;
+        }
+
+        inputRead = scanf("%d[^\n]", MAX_SCANF_INPUT, (*buffer + len));
+
+        if (inputRead == EOF) { 
+            if (len == 0) {
+                free(*buffer);
+                *buffer = NULL;
+                return NULL;
+            }
+            break;
+        }
+
+        if (inputRead == 1) { 
+            len += strlen(*buffer + len);
+        } else { 
+            (*buffer)[len] = '\0';
+            break;
+        }
+    }
+
+    scanf("%*[^\n]");
+    scanf("%*c");
+
+    if (*size > (len * SHRINK_THRESHOLD_FACTOR) && *size > INITIAL_BUFFER_SIZE) {
+        size_t newSize = INITIAL_BUFFER_SIZE;
+        while (newSize < (len + 1)) {
+            newSize *= EXPANSION_FACTOR;
+        }
+        char *shrunkBuffer = realloc(*buffer, newSize);
+        if (shrunkBuffer) {
+            *buffer = shrunkBuffer;
+            *size = newSize;
+        }
+    }
+
+    return *buffer;
+}
+
+
+char *strdupCustom(const char *s)
+{
+    if (s == NULL) {
+        return NULL;
+    }
+
+    size_t len = (strlen(s) + 1);
+    char *copy = malloc(len);
+    if (!copy) {
+        return NULL;
+    }
+    memcpy(copy, s, len);
+    return copy;
+}
+
+
 char* readStringInput(const char* prompt)
 {
     char *buffer = NULL;
@@ -83,7 +196,7 @@ char* readStringInput(const char* prompt)
     do {
         printf("%s", prompt);
        
-        if (getline(&buffer, &size, stdin) == INVALID) {
+        if (getlineCustom(&buffer, &size) == INVALID) {
             free(buffer);
             printf("Invalid option\n");
             buffer = NULL;
@@ -134,25 +247,30 @@ int readIntegerInput(const char* prompt)
     return value;
 }
 
+
 int compareByYear(const void *a, const void *b)
 {
     return ((*(Song **)a)->year) - ((*(Song **)b)->year);
 }
+
 
 int compareByStreamAscend(const void *a, const void *b)
 {
     return ((*(Song **)a)->streams) - ((*(Song **)b)->streams);
 }
 
+
 int compareByStreamDescend(const void *a, const void *b)
 {
     return( (*(Song **)b)->streams) - ((*(Song **)a)->streams);
 }
 
+
 int compareByTitle(const void *a, const void *b)
 {
     return strcmp((*(Song **)a)->title, (*(Song **)b)->title);
 }
+
 
 void insertionSort(Song **songs, int n, int (*comparator)(const void *, const void *))
 {
@@ -166,6 +284,7 @@ void insertionSort(Song **songs, int n, int (*comparator)(const void *, const vo
         songs[j + 1] = key;
     }
 }
+
 
 Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*comparator)(const void *, const void *))
 {
@@ -187,6 +306,7 @@ Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*com
     return result;
 }
 
+
 Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void *))
 {
     if (n < 2) {
@@ -201,6 +321,7 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
     return songs;
 }
 
+
 void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void *))
 {
     if (n <= SMALL_DATASET_THRESHOLD) {
@@ -209,6 +330,7 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
         songs = mergeSort(songs, n, comparator);
     }
 }
+
 
 void songSort (Playlist *playlist)
 {
@@ -397,10 +519,11 @@ void addSong(Song ***songCollected, int *songCount)
     (*songCount)++;
 }
 
+
 void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
 {
     printf("Enter playlist's name:\n");
-    char *playlistName = calloc(INITIAL_PLAYLIST_NAME_SIZE, sizeof(char));
+    char *playlistName = calloc(INITIAL_BUFFER_SIZE, sizeof(char));
     if (!playlistName) {
         printf("Invalid option\n");
         return;
@@ -423,7 +546,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
 
     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
 
-    size_t size = INITIAL_PLAYLIST_NAME_SIZE;
+    size_t size = INITIAL_BUFFER_SIZE;
     size_t len = 0;
     while (1) {
         int inputResult = scanf(formatStr, (playlistName + len));
@@ -472,8 +595,8 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
 
     playlistName[len] = '\0';
 
-    if (size > (len * SHRINK_THRESHOLD_FACTOR) && size > INITIAL_PLAYLIST_NAME_SIZE) {
-        size_t newSize = INITIAL_PLAYLIST_NAME_SIZE;
+    if (size > (len * SHRINK_THRESHOLD_FACTOR) && size > INITIAL_BUFFER_SIZE) {
+        size_t newSize = INITIAL_BUFFER_SIZE;
         while (newSize < (len + 1)) {
             newSize *= EXPANSION_FACTOR;
         }
@@ -494,7 +617,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
         return;
     }
 
-    newPlaylist->name = strdup(playlistName);
+    newPlaylist->name = strdupCustom(playlistName);
     if (!newPlaylist->name) {
         printf("Invalid option\n");
         free(playlistName);
@@ -751,3 +874,5 @@ int main()
     printf("Goodbye!\n");
     return 0;
 }
+
+// TODO: input == EOF;
