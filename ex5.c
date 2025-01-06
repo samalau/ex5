@@ -888,7 +888,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 {
     int
         chosen = INVALID,
-        option = INVALID,
+        option = 0,
         printMenu = 1;
 
     do {
@@ -909,7 +909,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 
         option = scanf(" %d", &chosen);
 
-        if (chosen == KILL) {
+        if (option == EOF || chosen == KILL) {
             return KILL;
         }
 
