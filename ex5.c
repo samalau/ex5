@@ -65,7 +65,7 @@ void playSong(int songIndex, Song **songCollected) {
 
 void playAllSong(Song **songCollected, int songCount) {
     for (int songIndex = 0; songIndex < songCount; songIndex++) {
-        playSong(songIndex, songCollected );
+        playSong(songIndex, songCollected);
         
         
     }
@@ -118,13 +118,13 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
     if (scanf(" %d", &chosen) != 1 || chosen < 1 || chosen > menuNumber) {
         scanf("%*[^\n]");
         scanf("%*c");
+        printf("Invalid option\n");
         return INVALID;
     }
 
     if (chosen == menuNumber) {
         return GO_HOME;
     }
-
     return chosen - 1;
 }
 
@@ -153,6 +153,81 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
 }
 
 
+char* readStringInput(const char* prompt) {
+    char *buffer = NULL;
+    size_t size = 0;
+    ssize_t len;
+
+    do {
+        printf("%s", prompt);
+        len = getline(&buffer, &size, stdin);
+        if (len == -1 || buffer[0] == '\n') {
+            printf("Invalid option\n");
+            free(buffer);
+            buffer = NULL;
+            size = 0;
+        } else {
+            buffer[strcspn(buffer, "\n")] = '\0';
+        }
+    } while (len == -1 || buffer == NULL);
+
+    return buffer;
+}
+
+int readIntegerInput(const char* prompt) {
+    int value;
+    int input;
+    char confirmInt;
+    do {
+        printf("%s", prompt);
+        input = scanf(" %d%c", &value, &confirmInt);
+        if (input != 2 || (confirmInt != '\n' && confirmInt != ' ')) {
+            printf("Invalid option\n");
+            while (scanf("%*[^\n]") != 0);
+            scanf("%*c");
+        } else {
+            while (confirmInt == ' ') {
+                input = scanf("%c", &confirmInt);
+                if (confirmInt != ' ' && confirmInt != '\n') {
+                    printf("Invalid option\n");
+                    while (scanf("%*[^\n]") != 0);
+                    scanf("%*c");
+                    input = INVALID;
+                    break;
+                }
+            }
+        }
+    } while (input != 2 || confirmInt != '\n');
+    return value;
+}
+
+// int readIntegerInput(const char* prompt) {
+//     int value;
+//     int input;
+//     char confirmInt;
+//     do {
+//         printf("%s", prompt);
+//         input = scanf("%*[^0-9]%d%c", &value, &confirmInt);
+//         if (input != 2 || (confirmInt != '\n' && confirmInt != ' ')) {
+//             printf("Invalid option\n");
+//             while (scanf("%*[^\n]") != EOF);
+//             scanf("%*c");
+//         } else {
+//             while (confirmInt == ' ') {
+//                 input = scanf("%c", &confirmInt);
+//                 if (confirmInt != ' ' && confirmInt != '\n') {
+//                     printf("Invalid option\n");
+//                     while (scanf("%*[^\n]") != EOF);
+//                     scanf("%*c");
+//                     input = INVALID;
+//                     break;
+//                 }
+//             }
+//         }
+//     } while (input != 2 || confirmInt != '\n');
+//     return value;
+// }
+
 void addSong(Song ***songCollected, int *songCount) {
     printf("Enter song's details:\n");
 
@@ -163,24 +238,16 @@ void addSong(Song ***songCollected, int *songCount) {
     }
 
     // get song title
-    printf("Title:\n");
-    char buffer[256];
-    scanf(" %[^\n]", buffer);
-    newSong->title = strdup(buffer);
+    newSong->title = readStringInput("Title:\n");
 
     // get artist name
-    printf("Artist:\n");
-    scanf(" %[^\n]", buffer);
-    newSong->artist = strdup(buffer);
+    newSong->artist = readStringInput("Artist:\n");
 
     // get year of release
-    printf("Year of release:\n");
-    scanf(" %d", &newSong->year);
+    newSong->year = readIntegerInput("Year of release:\n");
 
     // get lyrics
-    printf("Lyrics:\n");
-    scanf(" %[^\n]", buffer);
-    newSong->lyrics = strdup(buffer);
+    newSong->lyrics = readStringInput("Lyrics:\n");
 
     // initialize stream count
     newSong->streams = 0;
@@ -213,7 +280,6 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     while (scanf(" %63[^\n]", playlistName + len) == 1) {
         size_t buffer_len = strlen(playlistName + len);
         len += buffer_len;
-
         if (len + 1 >= size) {
             size *= 2;
             char *new_playlistName = realloc(playlistName, size);
@@ -224,14 +290,13 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
             }
             playlistName = new_playlistName;
         }
-
         if (buffer_len < 63) {
             break;
         }
     }
 
     if (len == 0) {
-        printf("INVALID\n");
+        printf("Invalid option\n");
         free(playlistName);
         return;
     }
@@ -382,9 +447,14 @@ int home(Playlist ***playlistCollected, int *playlistCount)
             case KILL:
                 break;
             case VIEW:
-                while ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
-                    playlistGoTo((*playlistCollected)[chosen]);
-                }
+                do {
+                    while ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
+                        playlistGoTo((*playlistCollected)[chosen]);
+                    }
+                    // if (chosen == INVALID) {
+                    //     printf("Invalid option\n");
+                    // }
+                } while (chosen == INVALID);
                 printMenu = 1;
                 break;
             case ADD:
@@ -393,7 +463,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 break;
             case DELETE:
             if ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
-                     delPlaylist(playlistCollected, playlistCount, chosen);
+                delPlaylist(playlistCollected, playlistCount, chosen);
                 printMenu = 1;
                 break;
             default:
