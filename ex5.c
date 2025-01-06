@@ -123,19 +123,37 @@ char *getlineCustom(char **buffer, size_t *size)
     size_t len = 0;
     int inputRead;
     
+    size_t temp = MAX_SCANF_INPUT;
+    size_t digitCount = 0;
+    do {
+        digitCount++;
+        temp /= 10;
+    } while (temp > 0);
+
+    size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
+    char *formatStr = malloc(formatSize);
+    if (!formatStr) {
+        free(*buffer);
+        *buffer = NULL;
+        return NULL;
+    }
+
+    sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
+
     while (1) {
         if ((len + MAX_SCANF_INPUT) >= *size) {
             *size *= EXPANSION_FACTOR;
             char *newBuffer = realloc(*buffer, *size);
             if (!newBuffer) {
                 free(*buffer);
+                free(formatStr);
                 *buffer = NULL;
                 return NULL;
             }
             *buffer = newBuffer;
         }
 
-        inputRead = scanf(" %%%d[^\n]", MAX_SCANF_INPUT, (*buffer + len));
+        inputRead = scanf(formatStr, *buffer + len);
 
         if (inputRead == EOF) { 
             if (len == 0) {
@@ -154,6 +172,8 @@ char *getlineCustom(char **buffer, size_t *size)
         }
     }
 
+    free(formatStr);
+    
     scanf("%*[^\n]");
     scanf("%*c");
 
