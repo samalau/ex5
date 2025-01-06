@@ -725,8 +725,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 if ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
                     int chosenIndex = (chosen - 1);
                     delPlaylist(playlistCollected, playlistCount, chosenIndex);
-                    break;
                 }
+            break;
             }
             default: {
                 printf("Invalid option\n");
