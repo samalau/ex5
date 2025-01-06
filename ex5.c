@@ -110,19 +110,19 @@ void freePlaylist(Playlist *p)
 }
 
 
-char *getlineCustom(char **buffer, size_t *size)
-{
+
+char *getlineCustom(char **buffer, size_t *size) {
     if (*buffer == NULL) {
         *size = INITIAL_BUFFER_SIZE;
         *buffer = calloc(*size, sizeof(char));
-        if (!*buffer) {
-            return NULL;
+        while (!*buffer) {
+            *buffer = calloc(*size, sizeof(char));
         }
     }
 
     size_t len = 0;
     int inputRead;
-    
+
     size_t temp = MAX_SCANF_INPUT;
     size_t digitCount = 0;
     do {
@@ -132,10 +132,8 @@ char *getlineCustom(char **buffer, size_t *size)
 
     size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
     char *formatStr = malloc(formatSize);
-    if (!formatStr) {
-        free(*buffer);
-        *buffer = NULL;
-        return NULL;
+    while (!formatStr) {
+        formatStr = malloc(formatSize);
     }
 
     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
@@ -145,52 +143,124 @@ char *getlineCustom(char **buffer, size_t *size)
             *size *= EXPANSION_FACTOR;
             char *newBuffer = realloc(*buffer, *size);
             if (!newBuffer) {
-                free(*buffer);
                 free(formatStr);
-                *buffer = NULL;
                 return NULL;
             }
             *buffer = newBuffer;
         }
 
-        inputRead = scanf(formatStr, *buffer + len);
+        inputRead = scanf(formatStr, (*buffer + len));
 
-        if (inputRead == INVALID) { 
-            if (len == 0) {
-                free(*buffer);
-                *buffer = NULL;
-                return NULL;
-            }
-            break;
-        }
-
-        if (inputRead == 1) { 
+        if (inputRead == 1) {
             len += strlen(*buffer + len);
-        } else { 
-            (*buffer)[len] = '\0';
+        } else {
+            (*buffer)[0] = '\0'; 
             break;
         }
+
+        if (inputRead != 1 || len == 0) {
+            (*buffer)[0] = '\0'; 
+            break;
+        }
+        scanf("%*[^\n]");
+        scanf("%*c");
+
+        // if (inputRead != 1 || len == 0) {
+        //     scanf("%*[^\n]");
+        //     scanf("%*c");
+        //     break;
+        // }
+
+        break;
     }
 
     free(formatStr);
-
-    scanf("%*[^\n]");
-    scanf("%*c");
-
-    if (*size > (len * SHRINK_THRESHOLD_FACTOR) && *size > INITIAL_BUFFER_SIZE) {
-        size_t newSize = INITIAL_BUFFER_SIZE;
-        while (newSize < (len + 1)) {
-            newSize *= EXPANSION_FACTOR;
-        }
-        char *shrunkBuffer = realloc(*buffer, newSize);
-        if (shrunkBuffer) {
-            *buffer = shrunkBuffer;
-            *size = newSize;
-        }
-    }
-
     return *buffer;
 }
+
+// char *getlineCustom(char **buffer, size_t *size)
+// {
+//     if (*buffer == NULL) {
+//         *size = INITIAL_BUFFER_SIZE;
+//         *buffer = calloc(*size, sizeof(char));
+//         if (!*buffer) {
+//             return NULL;
+//         }
+//     }
+
+//     size_t len = 0;
+//     int inputRead;
+    
+//     size_t temp = MAX_SCANF_INPUT;
+//     size_t digitCount = 0;
+//     do {
+//         digitCount++;
+//         temp /= 10;
+//     } while (temp > 0);
+
+//     size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
+//     char *formatStr = malloc(formatSize);
+//     if (!formatStr) {
+//         free(*buffer);
+//         *buffer = NULL;
+//         return NULL;
+//     }
+
+//     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
+
+//     while (1) {
+//         if ((len + MAX_SCANF_INPUT + 1) >= *size) {
+//             *size *= EXPANSION_FACTOR;
+//             char *newBuffer = realloc(*buffer, *size);
+//             if (!newBuffer) {
+//                 free(*buffer);
+//                 free(formatStr);
+//                 *buffer = NULL;
+//                 return NULL;
+//             }
+//             *buffer = newBuffer;
+//         }
+
+//         inputRead = scanf(formatStr, *buffer + len);
+
+//         if (inputRead == INVALID) { 
+//             if (len == 0) {
+//                 free(*buffer);
+//                 *buffer = NULL;
+//                 return NULL;
+//             }
+//             break;
+//         }
+
+//         if (inputRead == 1) { 
+//             len += strlen(*buffer + len);
+//         } else { 
+//             (*buffer)[len] = '\0';
+//             break;
+//         }
+//     }
+
+//     free(formatStr);
+
+//     if (inputRead != 1) {
+//         scanf("%*[^\n]");
+//         scanf("%*c");
+//     }
+
+//     if (*size > (len * SHRINK_THRESHOLD_FACTOR) && *size > INITIAL_BUFFER_SIZE) {
+//         size_t newSize = INITIAL_BUFFER_SIZE;
+//         while (newSize < (len + 1)) {
+//             newSize *= EXPANSION_FACTOR;
+//         }
+//         char *shrunkBuffer = realloc(*buffer, newSize);
+//         if (shrunkBuffer) {
+//             *buffer = shrunkBuffer;
+//             *size = newSize;
+//         }
+//     }
+
+//     return *buffer;
+// }
 
 
 char *strdupCustom(const char *s)
@@ -216,7 +286,8 @@ char* readStringInput(const char* prompt)
     do {
         printf("%s", prompt);
        
-        if (getlineCustom(&buffer, &size) == NULL) {
+       if (getlineCustom(&buffer, &size) == NULL || buffer[0] == '\0') {
+        // if (getlineCustom(&buffer, &size) == NULL || strlen(buffer) == 0) {
             free(buffer);
             printf("Invalid option\n");
             buffer = NULL;
@@ -251,6 +322,7 @@ int readIntegerInput(const char* prompt)
             printf("Invalid option\n");
             scanf("%*[^\n]");
             scanf("%*c");
+            continue;
         } else {
             while (confirmInt == ' ') {
                 input = scanf("%c", &confirmInt);
@@ -474,6 +546,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
             scanf("%*[^\n]");
             scanf("%*c");
             printf("Invalid option\n");
+            continue;
         }
 
         if (chosen == menuNumber) {
@@ -517,7 +590,7 @@ void addSong(Song ***songCollected, int *songCount)
     Song *newSong = (Song *)malloc(sizeof(Song));
     if (!newSong) {
         printf("Invalid option\n");
-        return;
+        addSong(songCollected, songCount);
     }
 
     // get song title
@@ -545,118 +618,34 @@ void addSong(Song ***songCollected, int *songCount)
     (*songCount)++;
 }
 
-
-void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
-{
+void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     printf("Enter playlist's name:\n");
-    char *playlistName = calloc(INITIAL_BUFFER_SIZE, sizeof(char));
-    if (!playlistName) {
-        printf("Invalid option\n");
-        addPlaylist(playlistCollected, playlistCount);
-        // return;
-    }
+    char *playlistName = NULL;
+    size_t size = 0;
 
-    size_t temp = MAX_SCANF_INPUT;
-    size_t digitCount = 0;
-    do {
-        digitCount++;
-        temp /= 10;
-    } while (temp > 0);
+    getlineCustom(&playlistName, &size);
 
-    size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
-    char *formatStr = malloc(formatSize);
-    if (!formatStr) {
+    // if (!playlistName || playlistName[0] == '\0') {
+    if (!playlistName || strlen(playlistName) == 0) {
         free(playlistName);
         printf("Invalid option\n");
-        addPlaylist(playlistCollected, playlistCount);
-        // return;
-    }
-
-    sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
-
-    size_t size = INITIAL_BUFFER_SIZE;
-    size_t len = 0;
-    while (1) {
-        int inputResult = scanf(formatStr, (playlistName + len));
-        if (inputResult == EOF) {
-            free(playlistName);
-            free(formatStr);
-            printf("Invalid option\n");
-            addPlaylist(playlistCollected, playlistCount);
-            // return;
-        }
-        if (inputResult != 1) {
-            break;
-        }
-
-        size_t buffer_len = strlen(playlistName + len);
-        len += buffer_len;
-
-        if ((len + 1) >= size) {
-            size_t new_size = (size * EXPANSION_FACTOR);
-            char *new_playlistName = realloc(playlistName, new_size);
-            if (!new_playlistName) {
-                free(playlistName);
-                free(formatStr);
-                printf("Invalid option\n");
-                addPlaylist(playlistCollected, playlistCount);
-                // return;
-            }
-            playlistName = new_playlistName;
-            size = new_size;
-        }
-
-        if (buffer_len == MAX_SCANF_INPUT) {
-            scanf("%*[^\n]");
-            scanf("%*c");
-        }
-
-        if (buffer_len < MAX_SCANF_INPUT) {
-            break;
-        }
-    }
-
-    if (len == 0) {
-        free(playlistName);
-        free(formatStr);
-        printf("Invalid option\n");
-        addPlaylist(playlistCollected, playlistCount);
-        // return;
-    }
-
-    playlistName[len] = '\0';
-
-    if (size > (len * SHRINK_THRESHOLD_FACTOR) && size > INITIAL_BUFFER_SIZE) {
-        size_t newSize = INITIAL_BUFFER_SIZE;
-        while (newSize < (len + 1)) {
-            newSize *= EXPANSION_FACTOR;
-        }
-        if (newSize < size) {
-            char *shrunk_playlistName = realloc(playlistName, newSize);
-            if (shrunk_playlistName) {
-                playlistName = shrunk_playlistName;
-                size = newSize;
-            }
-        }
+        return;
     }
 
     Playlist *newPlaylist = malloc(sizeof(Playlist));
     if (!newPlaylist) {
         free(playlistName);
-        free(formatStr);
         printf("Invalid option\n");
-        addPlaylist(playlistCollected, playlistCount);
-        // return;
+        return;
     }
 
     newPlaylist->name = strdupCustom(playlistName);
+    free(playlistName);
+
     if (!newPlaylist->name) {
-        free(playlistName);
         free(newPlaylist);
-        free(formatStr);
         printf("Invalid option\n");
-        addPlaylist(playlistCollected, playlistCount);
-        // return;
+        return;
     }
 
     newPlaylist->songs = NULL;
@@ -666,21 +655,150 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
     if (!tempCollection) {
         free(newPlaylist->name);
         free(newPlaylist);
-        free(playlistName);
-        free(formatStr);
         printf("Invalid option\n");
-        addPlaylist(playlistCollected, playlistCount);
-        // return;
+        return;
     }
 
     *playlistCollected = tempCollection;
     (*playlistCollected)[*playlistCount] = newPlaylist;
     (*playlistCount)++;
-
-    free(playlistName);
-    free(formatStr);
-    return;
 }
+
+// void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
+// {
+//     printf("Enter playlist's name:\n");
+//     char *playlistName = calloc(INITIAL_BUFFER_SIZE, sizeof(char));
+//     if (!playlistName) {
+//         printf("Invalid option\n");
+//         addPlaylist(playlistCollected, playlistCount);
+//         // return;
+//     }
+
+//     size_t temp = MAX_SCANF_INPUT;
+//     size_t digitCount = 0;
+//     do {
+//         digitCount++;
+//         temp /= 10;
+//     } while (temp > 0);
+
+//     size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
+//     char *formatStr = malloc(formatSize);
+//     if (!formatStr) {
+//         free(playlistName);
+//         printf("Invalid option\n");
+//         addPlaylist(playlistCollected, playlistCount);
+//         // return;
+//     }
+
+//     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
+
+//     size_t size = INITIAL_BUFFER_SIZE;
+//     size_t len = 0;
+//     while (1) {
+//         int inputResult = scanf(formatStr, (playlistName + len));
+//         if (inputResult == EOF) {
+//             free(playlistName);
+//             free(formatStr);
+//             printf("Invalid option\n");
+//             addPlaylist(playlistCollected, playlistCount);
+//             // return;
+//         }
+//         if (inputResult != 1) {
+//             break;
+//         }
+
+//         size_t buffer_len = strlen(playlistName + len);
+//         len += buffer_len;
+
+//         if ((len + 1) >= size) {
+//             size_t new_size = (size * EXPANSION_FACTOR);
+//             char *new_playlistName = realloc(playlistName, new_size);
+//             if (!new_playlistName) {
+//                 free(playlistName);
+//                 free(formatStr);
+//                 printf("Invalid option\n");
+//                 addPlaylist(playlistCollected, playlistCount);
+//                 // return;
+//             }
+//             playlistName = new_playlistName;
+//             size = new_size;
+//         }
+
+//         if (buffer_len == MAX_SCANF_INPUT) {
+//             scanf("%*[^\n]");
+//             scanf("%*c");
+//         }
+
+//         if (buffer_len < MAX_SCANF_INPUT) {
+//             break;
+//         }
+//     }
+
+//     if (len == 0) {
+//         free(playlistName);
+//         free(formatStr);
+//         printf("Invalid option\n");
+//         addPlaylist(playlistCollected, playlistCount);
+//         // return;
+//     }
+
+//     playlistName[len] = '\0';
+
+//     if (size > (len * SHRINK_THRESHOLD_FACTOR) && size > INITIAL_BUFFER_SIZE) {
+//         size_t newSize = INITIAL_BUFFER_SIZE;
+//         while (newSize < (len + 1)) {
+//             newSize *= EXPANSION_FACTOR;
+//         }
+//         if (newSize < size) {
+//             char *shrunk_playlistName = realloc(playlistName, newSize);
+//             if (shrunk_playlistName) {
+//                 playlistName = shrunk_playlistName;
+//                 size = newSize;
+//             }
+//         }
+//     }
+
+//     Playlist *newPlaylist = malloc(sizeof(Playlist));
+//     if (!newPlaylist) {
+//         free(playlistName);
+//         free(formatStr);
+//         printf("Invalid option\n");
+//         addPlaylist(playlistCollected, playlistCount);
+//         // return;
+//     }
+
+//     newPlaylist->name = strdupCustom(playlistName);
+//     if (!newPlaylist->name) {
+//         free(playlistName);
+//         free(newPlaylist);
+//         free(formatStr);
+//         printf("Invalid option\n");
+//         addPlaylist(playlistCollected, playlistCount);
+//         // return;
+//     }
+
+//     newPlaylist->songs = NULL;
+//     newPlaylist->songsNum = 0;
+
+//     Playlist **tempCollection = realloc(*playlistCollected, (*playlistCount + 1) * sizeof(Playlist *));
+//     if (!tempCollection) {
+//         free(newPlaylist->name);
+//         free(newPlaylist);
+//         free(playlistName);
+//         free(formatStr);
+//         printf("Invalid option\n");
+//         addPlaylist(playlistCollected, playlistCount);
+//         // return;
+//     }
+
+//     *playlistCollected = tempCollection;
+//     (*playlistCollected)[*playlistCount] = newPlaylist;
+//     (*playlistCount)++;
+
+//     free(playlistName);
+//     free(formatStr);
+//     return;
+// }
 
 
 void playlistGoTo(Playlist *playlist)
@@ -797,15 +915,15 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 
         if (option != 1) {
             chosen = INVALID;
-            scanf("%*[^\n]");
-            scanf("%*c");
+            // scanf("%*[^\n]");
+            // scanf("%*c");
             printMenu = 1;
         } else {
             printMenu = 0;
         }
 
-        // scanf("%*[^\n]");
-        // scanf("%*c");
+        scanf("%*[^\n]");
+        scanf("%*c");
 
         switch (chosen) {
             case VIEW: {
