@@ -888,7 +888,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 {
     int
         chosen = INVALID,
-        option = 0,
+        option = QUIT,
         printMenu = 1;
 
     do {
