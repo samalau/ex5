@@ -763,7 +763,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 "%d. Watch playlists\n"
                 "%d. Add playlist\n"
                 "%d. Remove playlist\n"
-                "%d. Exit\n",
+                "%d. exit\n",
 
                 VIEW,
                 ADD,
