@@ -114,7 +114,7 @@ char *getlineCustom(char **buffer, size_t *size)
 {
     if (*buffer == NULL) {
         *size = INITIAL_BUFFER_SIZE;
-        *buffer = malloc(*size);
+        *buffer = calloc(*size, sizeof(char));
         if (!*buffer) {
             return NULL;
         }
@@ -141,7 +141,7 @@ char *getlineCustom(char **buffer, size_t *size)
     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
 
     while (1) {
-        if ((len + MAX_SCANF_INPUT) >= *size) {
+        if ((len + MAX_SCANF_INPUT + 1) >= *size) {
             *size *= EXPANSION_FACTOR;
             char *newBuffer = realloc(*buffer, *size);
             if (!newBuffer) {
@@ -173,7 +173,7 @@ char *getlineCustom(char **buffer, size_t *size)
     }
 
     free(formatStr);
-    
+
     scanf("%*[^\n]");
     scanf("%*c");
 
