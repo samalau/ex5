@@ -124,12 +124,6 @@ int readIntegerInput(const char* prompt) {
     return value;
 }
 
-/////////////////////////////
-
-int compareByTitle(const void *a, const void *b) {
-    return strcmp((*(Song **)a)->title, (*(Song **)b)->title);
-}
-
 int compareByYear(const void *a, const void *b) {
     return (*(Song **)a)->year - (*(Song **)b)->year;
 }
@@ -140,6 +134,10 @@ int compareByStreamAscend(const void *a, const void *b) {
 
 int compareByStreamDescend(const void *a, const void *b) {
     return (*(Song **)b)->streams - (*(Song **)a)->streams;
+}
+
+int compareByTitle(const void *a, const void *b) {
+    return strcmp((*(Song **)a)->title, (*(Song **)b)->title);
 }
 
 void insertionSort(Song **songs, int n, int (*comparator)(const void *, const void *)) {
@@ -188,8 +186,6 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
     }
 }
 
-////////////////////////////
-
 void songSort (Playlist *playlist)
 {
     int method = readIntegerInput(
@@ -223,7 +219,6 @@ void songSort (Playlist *playlist)
     }
 }
 
-////////////////////////////
 
 void playSong(int songIndex, Song **songCollected) {
     printf("Now playing %s:\n", songCollected[songIndex]->title);
@@ -361,10 +356,6 @@ void addSong(Song ***songCollected, int *songCount) {
     if (!*songCollected) {
         freeSong(newSong);
         printf("Invalid option\n");
-        // free(newSong->title);
-        // free(newSong->artist);
-        // free(newSong->lyrics);
-        // free(newSong);
         return;
     }
     (*songCollected)[*songCount] = newSong;
