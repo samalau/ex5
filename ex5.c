@@ -18,14 +18,12 @@ Assignment: ex5
 #define PLAY 5
 #define BACK 6
 
-
 #define SORT_BY_YEAR 1
 #define SORT_ASCEND_STREAM 2
 #define SORT_DESCEND_STREAM 3
 #define SORT_ALPHABETIC 4
-#define SORT_DEFAULT 4
+#define SORT_DEFAULT SORT_ALPHABETIC
 
-#define MENU_MINIMUM 1
 #define GO_HOME -2
 #define INVALID -1
 #define QUIT 0
@@ -148,7 +146,7 @@ void songSort (Playlist *playlist)
         "4. sort alphabetically\n"
     );
 
-    if (method < MENU_MINIMUM || method > SORT_DEFAULT) {
+    if (method <= SORT_DEFAULT - SORT_DEFAULT || method > SORT_DEFAULT) {
         method = SORT_DEFAULT;
     }
 
@@ -480,9 +478,6 @@ void playlistGoTo(Playlist *playlist)
         scanf("%*c");
 
         switch (chosen) {
-            // case BACK: {
-            //     break;
-            // }
             case VIEW: {
                 songID(playlistCurrent->songs, playlistCurrent->songsNum);
                 while ((chosen = songSelect("play", playlistCurrent->songsNum)) != INVALID && chosen != QUIT) {
