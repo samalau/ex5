@@ -3,20 +3,31 @@ Name: Samantha Newmark
 ID: 346587629
 Assignment: ex5
 *******************/
+
+// TODO: input == EOF;
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define GO_HOME -2
-#define INVALID -1
-#define QUIT 0
 #define VIEW 1
 #define ADD 2
 #define DELETE 3
-#define KILL 4
 #define SORT 4
 #define PLAY 5
 #define BACK 6
+
+#define SORT_YEAR 1
+#define SORT_MOST_STREAM 2
+#define SORT_LEAST_STREAM 3
+#define SORT_ALPHABET 4
+
+#define GO_HOME -2
+#define INVALID -1
+#define QUIT 0
+#define KILL 4
+
 #define SMALL_DATASET_THRESHOLD 10
 
 typedef struct Song {
@@ -122,6 +133,29 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
 
 ////////////////////////////
 
+void songSort(Playlist *playlist) {
+        int
+            methodMin = SORT_YEAR,
+            methodMax = SORT_ALPHABET,
+            methodDefault = SORT_ALPHABET,
+            method = methodDefault;
+
+        char prompt =
+            "choose:\n"
+            "1. sort by year\n"
+            "2. sort by streams - ascending order\n"
+            "3. sort by streams - descending order\n"
+            "4. sort alphabetically\n";
+
+        method = readIntegerInput(prompt);
+        if (method < methodMin || method > methodMax) {
+            return methodDefault;
+        }
+        return method;
+}
+
+////////////////////////////
+
 void playSong(int songIndex, Song **songCollected) {
     printf("Now playing %s:\n", songCollected[songIndex]->title);
     printf("$ %s $\n", songCollected[songIndex]->lyrics);
@@ -164,8 +198,6 @@ int songSelect(char action[], int songCount) {
         scanf("%*[^\n]");
         scanf("%*c");
 
-        // TODO: input == EOF;
-
         if (songCount == 0 || chosen == QUIT) {
             return QUIT;
         }
@@ -198,7 +230,6 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
             scanf("%*c");
             printf("Invalid option\n");
             chosen = INVALID;
-            // return INVALID;
         }
 
         if (chosen == menuNumber) {
@@ -432,9 +463,9 @@ void playlistGoTo(Playlist *playlist)
         scanf("%*c");
 
         switch (chosen) {
-
-            case BACK: break;
-
+            // case BACK: {
+            //     break;
+            // }
             case VIEW: {
                 songID(playlistCurrent->songs, playlistCurrent->songsNum);
                 while ((chosen = songSelect("play", playlistCurrent->songsNum)) != INVALID && chosen != QUIT) {
@@ -456,7 +487,8 @@ void playlistGoTo(Playlist *playlist)
                 break;
             }
             case SORT: {
-            // TODO: sort
+            songSort();
+            printf("sorted\n");
             break;
             }
             case PLAY: {
@@ -522,9 +554,6 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                         int chosenIndex = chosen - 1;
                         playlistGoTo((*playlistCollected)[chosenIndex]);
                     }
-                    // if (chosen == INVALID) {
-                    //     printf("Invalid option\n");
-                    // }
                 } while (chosen == INVALID);
                 break;
             case ADD:
@@ -556,4 +585,5 @@ int main()
     }
     free(playlistCollected);
     printf("Goodbye!\n");
+    return 0;
 }
