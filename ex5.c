@@ -196,7 +196,7 @@ char* readStringInput(const char* prompt)
     do {
         printf("%s", prompt);
        
-        if (getlineCustom(&buffer, &size) == INVALID) {
+        if (getlineCustom(&buffer, &size) == NULL) {
             free(buffer);
             printf("Invalid option\n");
             buffer = NULL;
