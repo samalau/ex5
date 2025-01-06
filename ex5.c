@@ -136,8 +136,6 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
 
 void songSort (Playlist *playlist)
 {
-    int defaultComparison = compareByTitle;
-
     int method = readIntegerInput(
         "choose:\n"
         "1. sort by year\n"
@@ -164,7 +162,7 @@ void songSort (Playlist *playlist)
             hybridSort(playlist->songs, playlist->songsNum, compareByTitle); 
             break;
         default: 
-            hybridSort(playlist->songs, playlist->songsNum, defaultComparison); 
+            hybridSort(playlist->songs, playlist->songsNum, compareByTitle); 
             break;
     }
 }
