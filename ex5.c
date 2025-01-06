@@ -852,12 +852,16 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 
         switch (chosen) {
             case VIEW: {
-                do {
-                    while ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
-                        int chosenIndex = (chosen - 1);
-                        playlistGoTo((*playlistCollected)[chosenIndex]);
-                    }
-                } while (chosen == INVALID);
+                while ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
+                    int chosenIndex = (chosen - 1);
+                    playlistGoTo((*playlistCollected)[chosenIndex]);
+                }
+                // do {
+                //     while ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
+                //         int chosenIndex = (chosen - 1);
+                //         playlistGoTo((*playlistCollected)[chosenIndex]);
+                //     }
+                // } while (chosen != INVALID);
                 break;
             }
             case ADD: {
@@ -875,8 +879,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 printf("Invalid option\n");
                 break;
             }
-            printMenu = 1;
         }
+        printMenu = 1;
     } while (chosen != KILL);
     return chosen;
 }
