@@ -18,11 +18,14 @@ Assignment: ex5
 #define PLAY 5
 #define BACK 6
 
-#define SORT_YEAR 1
-#define SORT_MOST_STREAM 2
-#define SORT_LEAST_STREAM 3
-#define SORT_ALPHABET 4
 
+#define SORT_BY_YEAR 1
+#define SORT_ASCEND_STREAM 2
+#define SORT_DESCEND_STREAM 3
+#define SORT_ALPHABETIC 4
+#define SORT_DEFAULT 4
+
+#define MENU_MINIMUM 1
 #define GO_HOME -2
 #define INVALID -1
 #define QUIT 0
@@ -77,11 +80,11 @@ int compareByYear(const void *a, const void *b) {
     return (*(Song **)a)->year - (*(Song **)b)->year;
 }
 
-int compareByStreamsAsc(const void *a, const void *b) {
+int compareByStreamAscend(const void *a, const void *b) {
     return (*(Song **)a)->streams - (*(Song **)b)->streams;
 }
 
-int compareByStreamsDesc(const void *a, const void *b) {
+int compareByStreamDescend(const void *a, const void *b) {
     return (*(Song **)b)->streams - (*(Song **)a)->streams;
 }
 
@@ -127,31 +130,45 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
     if (n <= SMALL_DATASET_THRESHOLD) {
         insertionSort(songs, n, comparator);
     } else {
-        mergeSort(songs, n, comparator);
+        songs = mergeSort(songs, n, comparator);
     }
 }
 
 ////////////////////////////
 
-void songSort(Playlist *playlist) {
-        int
-            methodMin = SORT_YEAR,
-            methodMax = SORT_ALPHABET,
-            methodDefault = SORT_ALPHABET,
-            method = methodDefault;
+void songSort (Playlist *playlist)
+{
+    int defaultComparison = compareByTitle;
 
-        char prompt =
-            "choose:\n"
-            "1. sort by year\n"
-            "2. sort by streams - ascending order\n"
-            "3. sort by streams - descending order\n"
-            "4. sort alphabetically\n";
+    int method = readIntegerInput(
+        "choose:\n"
+        "1. sort by year\n"
+        "2. sort by streams - ascending order\n"
+        "3. sort by streams - descending order\n"
+        "4. sort alphabetically\n"
+    );
 
-        method = readIntegerInput(prompt);
-        if (method < methodMin || method > methodMax) {
-            return methodDefault;
-        }
-        return method;
+    if (method < MENU_MINIMUM || method > SORT_DEFAULT) {
+        method = SORT_DEFAULT;
+    }
+
+    switch (method) {
+        case SORT_BY_YEAR: 
+            hybridSort(playlist->songs, playlist->songsNum, compareByYear); 
+            break;
+        case SORT_ASCEND_STREAM: 
+            hybridSort(playlist->songs, playlist->songsNum, compareByStreamAscend); 
+            break;
+        case SORT_DESCEND_STREAM: 
+            hybridSort(playlist->songs, playlist->songsNum, compareByStreamDescend); 
+            break;
+        case SORT_ALPHABETIC:
+            hybridSort(playlist->songs, playlist->songsNum, compareByTitle); 
+            break;
+        default: 
+            hybridSort(playlist->songs, playlist->songsNum, defaultComparison); 
+            break;
+    }
 }
 
 ////////////////////////////
@@ -487,7 +504,7 @@ void playlistGoTo(Playlist *playlist)
                 break;
             }
             case SORT: {
-            songSort();
+            songSort(playlistCurrent);
             printf("sorted\n");
             break;
             }
@@ -546,8 +563,6 @@ int home(Playlist ***playlistCollected, int *playlistCount)
         scanf("%*c");
 
         switch (chosen) {
-            case KILL:
-                break;
             case VIEW:
                 do {
                     while ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
