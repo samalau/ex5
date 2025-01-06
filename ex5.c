@@ -668,68 +668,6 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
 }
 
 
-// void addPlaylist(Playlist ***playlistCollected, int *playlistCount)
-// {
-//     printf("Enter playlist's name:\n");
-//     char *playlistName = NULL;
-//     size_t size = 64;
-//     playlistName = calloc(size, sizeof(char));
-//     if (!playlistName) {
-//         printf("Invalid option\n");
-//         return;
-//     }
-//     size_t len = 0;
-//     while (scanf(" %63[^\n]", playlistName + len) == 1) {
-//         size_t buffer_len = strlen(playlistName + len);
-//         len += buffer_len;
-//         if (len + 1 >= size) {
-//             size *= 2;
-//             char *new_playlistName = realloc(playlistName, size);
-//             if (!new_playlistName) {
-//                 printf("Invalid option\n");
-//                 free(playlistName);
-//                 return;
-//             }
-//             playlistName = new_playlistName;
-//         }
-//         if (buffer_len < 63) {
-//             break;
-//         }
-//     }
-
-//     if (len == 0) {
-//         printf("Invalid option\n");
-//         free(playlistName);
-//         return;
-//     }
-
-//     playlistName[len] = '\0';
-
-//     Playlist *newPlaylist = (Playlist *)malloc(sizeof(Playlist));
-//     if (!newPlaylist) {
-//         printf("Invalid option\n");
-//         free(playlistName);
-//         return;
-//     }
-//     newPlaylist->name = strdup(playlistName);
-//     newPlaylist->songs = NULL;
-//     newPlaylist->songsNum = 0;
-
-//     *playlistCollected = (Playlist **)realloc(*playlistCollected, (*playlistCount + 1) * sizeof(Playlist *));
-//     if (!*playlistCollected) {
-//         printf("Invalid option\n");
-//         free(newPlaylist->name);
-//         free(newPlaylist);
-//         free(playlistName);
-//         return;
-//     }
-//     (*playlistCollected)[*playlistCount] = newPlaylist;
-//     (*playlistCount)++;
-
-//     free(playlistName);
-// }
-
-
 void playlistGoTo(Playlist *playlist)
 {
     int chosen = BACK;
@@ -856,12 +794,6 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                     int chosenIndex = (chosen - 1);
                     playlistGoTo((*playlistCollected)[chosenIndex]);
                 }
-                // do {
-                //     while ((chosen = playlistID(*playlistCollected, *playlistCount)) != INVALID && chosen != GO_HOME) {
-                //         int chosenIndex = (chosen - 1);
-                //         playlistGoTo((*playlistCollected)[chosenIndex]);
-                //     }
-                // } while (chosen != INVALID);
                 break;
             }
             case ADD: {
