@@ -68,6 +68,62 @@ void freePlaylist(Playlist *p) {
     free(p);
 }
 
+
+char* readStringInput(const char* prompt) {
+    char *buffer = NULL;
+    size_t size = 0;
+    do {
+        printf("%s", prompt);
+       
+        if (getline(&buffer, &size, stdin) == INVALID) {
+            free(buffer);
+            printf("Invalid option\n");
+            buffer = NULL;
+            size = 0;
+        }
+
+        size_t length = strcspn(buffer, "\n");
+        buffer[length] = '\0';
+
+        if (length == 0) {
+            free(buffer);
+            printf("Invalid option\n");
+            buffer = NULL;
+            size = 0;
+        }
+    } while (buffer == NULL);
+
+    return buffer;
+}
+
+
+int readIntegerInput(const char* prompt) {
+    int value;
+    int input;
+    char confirmInt;
+    do {
+        printf("%s", prompt);
+        input = scanf(" %d%c", &value, &confirmInt);
+        if (input != 2 || (confirmInt != '\n' && confirmInt != ' ')) {
+            printf("Invalid option\n");
+            scanf("%*[^\n]");
+            scanf("%*c");
+        } else {
+            while (confirmInt == ' ') {
+                input = scanf("%c", &confirmInt);
+                if (confirmInt != ' ' && confirmInt != '\n') {
+                    printf("Invalid option\n");
+                    scanf("%*[^\n]");
+                    scanf("%*c");
+                    input = INVALID;
+                    break;
+                }
+            }
+        }
+    } while (input != 2 || confirmInt != '\n');
+    return value;
+}
+
 /////////////////////////////
 
 int compareByTitle(const void *a, const void *b) {
@@ -274,62 +330,6 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
 
     *playlistCollected = (Playlist **)realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
     (*playlistCount)--;
-}
-
-
-char* readStringInput(const char* prompt) {
-    char *buffer = NULL;
-    size_t size = 0;
-    do {
-        printf("%s", prompt);
-       
-        if (getline(&buffer, &size, stdin) == INVALID) {
-            free(buffer);
-            printf("Invalid option\n");
-            buffer = NULL;
-            size = 0;
-        }
-
-        size_t length = strcspn(buffer, "\n");
-        buffer[length] = '\0';
-
-        if (length == 0) {
-            free(buffer);
-            printf("Invalid option\n");
-            buffer = NULL;
-            size = 0;
-        }
-    } while (buffer == NULL);
-
-    return buffer;
-}
-
-
-int readIntegerInput(const char* prompt) {
-    int value;
-    int input;
-    char confirmInt;
-    do {
-        printf("%s", prompt);
-        input = scanf(" %d%c", &value, &confirmInt);
-        if (input != 2 || (confirmInt != '\n' && confirmInt != ' ')) {
-            printf("Invalid option\n");
-            scanf("%*[^\n]");
-            scanf("%*c");
-        } else {
-            while (confirmInt == ' ') {
-                input = scanf("%c", &confirmInt);
-                if (confirmInt != ' ' && confirmInt != '\n') {
-                    printf("Invalid option\n");
-                    scanf("%*[^\n]");
-                    scanf("%*c");
-                    input = INVALID;
-                    break;
-                }
-            }
-        }
-    } while (input != 2 || confirmInt != '\n');
-    return value;
 }
 
 
