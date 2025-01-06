@@ -135,7 +135,7 @@ char *getlineCustom(char **buffer, size_t *size)
             *buffer = newBuffer;
         }
 
-        inputRead = scanf("%d[^\n]", MAX_SCANF_INPUT, (*buffer + len));
+        inputRead = scanf(" %%%d[^\n]", MAX_SCANF_INPUT, (*buffer + len));
 
         if (inputRead == EOF) { 
             if (len == 0) {
