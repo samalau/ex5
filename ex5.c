@@ -3,6 +3,13 @@ Name: Samantha Newmark
 ID: 346587629
 Assignment: ex5
 *******************/
+
+// TODO: EOF
+// TODO: comments
+// TODO: streams
+// TODO: enumerate macros
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -110,8 +117,8 @@ void freePlaylist(Playlist *p)
 }
 
 
-
-char *getlineCustom(char **buffer, size_t *size) {
+char *getlineCustom(char **buffer, size_t *size)
+{
     if (*buffer == NULL) {
         *size = INITIAL_BUFFER_SIZE;
         *buffer = calloc(*size, sizeof(char));
@@ -168,91 +175,6 @@ char *getlineCustom(char **buffer, size_t *size) {
 }
 
 
-// char *getlineCustom(char **buffer, size_t *size)
-// {
-//     if (*buffer == NULL) {
-//         *size = INITIAL_BUFFER_SIZE;
-//         *buffer = calloc(*size, sizeof(char));
-//         if (!*buffer) {
-//             return NULL;
-//         }
-//     }
-
-//     size_t len = 0;
-//     int inputRead;
-    
-//     size_t temp = MAX_SCANF_INPUT;
-//     size_t digitCount = 0;
-//     do {
-//         digitCount++;
-//         temp /= 10;
-//     } while (temp > 0);
-
-//     size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
-//     char *formatStr = malloc(formatSize);
-//     if (!formatStr) {
-//         free(*buffer);
-//         *buffer = NULL;
-//         return NULL;
-//     }
-
-//     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
-
-//     while (1) {
-//         if ((len + MAX_SCANF_INPUT + 1) >= *size) {
-//             *size *= EXPANSION_FACTOR;
-//             char *newBuffer = realloc(*buffer, *size);
-//             if (!newBuffer) {
-//                 free(*buffer);
-//                 free(formatStr);
-//                 *buffer = NULL;
-//                 return NULL;
-//             }
-//             *buffer = newBuffer;
-//         }
-
-//         inputRead = scanf(formatStr, *buffer + len);
-
-//         if (inputRead == INVALID) { 
-//             if (len == 0) {
-//                 free(*buffer);
-//                 *buffer = NULL;
-//                 return NULL;
-//             }
-//             break;
-//         }
-
-//         if (inputRead == 1) { 
-//             len += strlen(*buffer + len);
-//         } else { 
-//             (*buffer)[len] = '\0';
-//             break;
-//         }
-//     }
-
-//     free(formatStr);
-
-//     if (inputRead != 1) {
-//         scanf("%*[^\n]");
-//         scanf("%*c");
-//     }
-
-//     if (*size > (len * SHRINK_THRESHOLD_FACTOR) && *size > INITIAL_BUFFER_SIZE) {
-//         size_t newSize = INITIAL_BUFFER_SIZE;
-//         while (newSize < (len + 1)) {
-//             newSize *= EXPANSION_FACTOR;
-//         }
-//         char *shrunkBuffer = realloc(*buffer, newSize);
-//         if (shrunkBuffer) {
-//             *buffer = shrunkBuffer;
-//             *size = newSize;
-//         }
-//     }
-
-//     return *buffer;
-// }
-
-
 char *strdupCustom(const char *s)
 {
     if (s == NULL) {
@@ -269,7 +191,8 @@ char *strdupCustom(const char *s)
 }
 
 
-char* readStringInput(const char* prompt) {
+char* readStringInput(const char* prompt)
+{
     char *buffer = NULL;
     size_t size = 0;
     int validInput = 0;
@@ -287,35 +210,6 @@ char* readStringInput(const char* prompt) {
 
     return buffer;
 }
-
-// char* readStringInput(const char* prompt)
-// {
-//     char *buffer = NULL;
-//     size_t size = 0;
-//     do {
-//         printf("%s", prompt);
-       
-//     //    if (getlineCustom(&buffer, &size) == NULL || buffer[0] == '\0') {
-//         if (getlineCustom(&buffer, &size) == NULL || strlen(buffer) == 0) {
-//             free(buffer);
-//             printf("Invalid option\n");
-//             buffer = NULL;
-//             size = 0;
-//         }
-
-//         size_t length = strcspn(buffer, "\n");
-//         buffer[length] = '\0';
-
-//         if (length == 0) {
-//             free(buffer);
-//             printf("Invalid option\n");
-//             buffer = NULL;
-//             size = 0;
-//         }
-//     } while (buffer == NULL);
-
-//     return buffer;
-// }
 
 
 int readIntegerInput(const char* prompt)
@@ -502,7 +396,7 @@ int songSelect(char action[], int songCount)
     do {
         printf("choose a song to %s, or 0 to quit:\n", action);
         input = scanf(" %d", &chosen);
-        
+
         if (songCount == 0 || chosen == QUIT) {
             if (input != 1) {
                 scanf("%*[^\n]");
@@ -612,6 +506,7 @@ void addSong(Song ***songCollected, int *songCount)
     (*songCollected)[*songCount] = newSong;
     (*songCount)++;
 }
+
 
 void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     printf("Enter playlist's name:\n");
@@ -823,7 +718,3 @@ int main()
     printf("Goodbye!\n");
     return 0;
 }
-
-// TODO: EOF
-// TODO: comments
-// TODO: streams
