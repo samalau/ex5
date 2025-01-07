@@ -642,7 +642,7 @@ void playlistGoTo(Playlist *playlist)
             }
         }
     printMenu = 1;
-    } while (chosen != BACK);
+    } while (chosen != QUIT);
 }
 
 
