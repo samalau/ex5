@@ -142,6 +142,8 @@ char *getlineCustom(char **buffer, size_t *size) {
             *size *= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
+                free(*buffer);
+                printf("Invalid option\n");
                 return NULL;
             }
             // while (!newBuffer) {
@@ -167,6 +169,7 @@ char *getlineCustom(char **buffer, size_t *size) {
             *size /= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
+                free(*buffer);
                 printf("Invalid option\n");
                 return NULL;
             }
@@ -592,17 +595,20 @@ void delSong(Song ***songCollected, int *songCount, int songIndex)
         (*songCollected)[i] = (*songCollected)[i + 1];
     }
 
-    if (*songCount == 1) {
+    (*songCount)--;
+
+    if (*songCount == 0) {
         free(*songCollected);
         *songCollected = NULL;
-        (*songCount)--;
     } else {
-        Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
-        if (temp != NULL) {
+        Song **temp = realloc(*songCollected, (*songCount) * sizeof(Song *));
+        if (temp == NULL) {
+            printf("Invalid option\n");
+        } else {
             *songCollected = temp;
-            (*songCount)--;
         }
     }
+}
     // Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
     // if (temp != NULL || *songCount == 1) {
     //     *songCollected = temp;
@@ -613,7 +619,7 @@ void delSong(Song ***songCollected, int *songCount, int songIndex)
     //     *songCollected = temp;
     //     (*songCount)--;
     // }
-}
+// }
 
 // void delSong(Song ***songCollected, int *songCount, int songIndex)
 // {
@@ -635,17 +641,40 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
     for (int i = playlistIndex; i < *playlistCount - 1; i++) {
         (*playlistCollected)[i] = (*playlistCollected)[i + 1];
     }
-    if (*playlistCount == 1) {
+
+    (*playlistCount)--;
+
+    if (*playlistCount == 0) {
         free(*playlistCollected);
         *playlistCollected = NULL;
-        (*playlistCount)--;
     } else {
-        Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
-        if (temp != NULL) {
+        Playlist **temp = realloc(*playlistCollected, (*playlistCount) * sizeof(Playlist *));
+        if (temp == NULL) {
+            printf("Memory reallocation failed.\n");
+        } else {
             *playlistCollected = temp;
-            (*playlistCount)--;
         }
     }
+}
+
+// void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
+// {
+//     freePlaylist((*playlistCollected)[playlistIndex]);
+
+//     for (int i = playlistIndex; i < *playlistCount - 1; i++) {
+//         (*playlistCollected)[i] = (*playlistCollected)[i + 1];
+//     }
+//     if (*playlistCount == 1) {
+//         free(*playlistCollected);
+//         *playlistCollected = NULL;
+//         (*playlistCount)--;
+//     } else {
+//         Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
+//         if (temp != NULL) {
+//             *playlistCollected = temp;
+//             (*playlistCount)--;
+//         }
+//     }
     // Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
     // if (temp != NULL || *playlistCount == 1) {
     //     *playlistCollected = temp;
@@ -656,7 +685,7 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
     //     *playlistCollected = temp;
     //     (*playlistCount)--;
     // }
-}
+// }
 
 // void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
 // {
