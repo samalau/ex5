@@ -35,6 +35,8 @@ Assignment: ex5
 #define GO_HOME (-2)
 #define INVALID (-1)
 #define QUIT 0
+#define OFF 0
+#define ON 1
 #define VALID 1
 #define KILL 4
 
@@ -93,7 +95,7 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
 void addSong(Song ***songCollected, int *songCount);
 void addPlaylist(Playlist ***playlistCollected, int *playlistCount);
 
-void playlistGoTo(Playlist *playlist);
+int playlistGoTo(Playlist *playlist);
 
 int home(Playlist ***playlistCollected, int *playlistCount);
 
@@ -460,15 +462,17 @@ int songSelect(char action[], int songCount)
         return EOF;
     }
 
+    if (chosen == QUIT || songCount <= 0) {
+        return (QUIT - 2);
+    }
+
     if (input == 0 || chosen < QUIT || chosen > songCount) {
         scanf("%*[^\n]");
         scanf("%*c");
         printf("Invalid option\n");
         return songSelect(action, songCount);
     }
-    if (chosen == QUIT || songCount <= 0) {
-        return QUIT;
-    }
+
     if (chosen > QUIT && chosen <= songCount) {
         return (--chosen);
     }
@@ -491,24 +495,27 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         }
         menuNumber = (i < 1) ? 1 : i;
     }
-    
+
     printf("%d. Back to main menu\n", menuNumber);
 
-    if (input = scanf(" %d", &chosen) != 1 || chosen < VALID || chosen > menuNumber) {
-        if (input == EOF) {
-            return EOF;
-        }
-        chosen = INVALID;
+    if (input = scanf(" %d", &chosen) == EOF) {
+        return EOF;
+    }
+
+    if (chosen == 1) {
+        return GO_HOME;
+    }
+
+    if (input == 0 || chosen < VALID || chosen > playlistCount) {
         scanf("%*[^\n]");
         scanf("%*c");
         printf("Invalid option\n");
-        return playlistID(playlistCollected, playlistCount);
+        return songSelect(playlistCollected, playlistCount);
     }
-
-    if (chosen == menuNumber) {
-        return GO_HOME;
+    
+    if (chosen > 1 && chosen <= playlistCount) {
+        return (--chosen);
     }
-    return (--chosen);
 }
 
 
@@ -671,7 +678,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
 }
 
 
-void playlistGoTo(Playlist *playlist)
+int playlistGoTo(Playlist *playlist)
 {
     if (playlist == NULL) {
         return;
@@ -698,7 +705,7 @@ void playlistGoTo(Playlist *playlist)
         }
         option = scanf(" %d", &chosen);
         if (chosen == BACK) {
-            return;
+            return BACK;
         }
 
         if (option != 1) {
@@ -717,12 +724,16 @@ void playlistGoTo(Playlist *playlist)
                     songID(playlistCurrent->songs, playlistCurrent->songsNum);
                 }
                 do {
-                    identity = songSelect("play", playlistCurrent->songsNum);
-                    if (identity != INVALID && identity != QUIT) {
-                        int identityIndex = identity - 1;
-                        playSong(identityIndex, playlistCurrent->songs);
+                    if ((identity = songSelect("play", playlistCurrent->songsNum)) == EOF) {
+                        return EOF;
                     }
-                } while (identity != QUIT);
+                    if (identity > EOF) {
+                        playSong(identity, playlistCurrent->songs);
+                    }
+                    // if (identity < EOF) {
+                    //     break;
+                    // }
+                } while (identity > EOF);
                 break;
             }
             case ADD: {
@@ -733,10 +744,15 @@ void playlistGoTo(Playlist *playlist)
                 if (playlistCurrent->songs != NULL && playlistCurrent->songsNum > 0) {
                     songID(playlistCurrent->songs, playlistCurrent->songsNum);
                 }
-                if ((identity = songSelect("delete", playlistCurrent->songsNum)) != INVALID && identity != QUIT) {
-                    int identityIndex = identity - 1;
-                    delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, identityIndex);
+                if ((identity = songSelect("delete", playlistCurrent->songsNum)) == EOF) {
+                    return EOF;
                 }
+                if (identity > EOF) {
+                    delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, identity);
+                }
+                // if (identity < EOF) {
+                //     break;
+                // }
                 break;
             }
             case SORT: {
@@ -753,7 +769,7 @@ void playlistGoTo(Playlist *playlist)
                 break;
             }
             case BACK: {
-                break;
+                return BACK;
             }
             default: {
                 scanf("%*[^\n]");
@@ -770,6 +786,7 @@ void playlistGoTo(Playlist *playlist)
 int home(Playlist ***playlistCollected, int *playlistCount)
 {
     int
+        state = INVALID,
         identity = INVALID,
         chosen = INVALID,
         option = QUIT,
@@ -806,9 +823,13 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 
         switch (chosen) {
             case VIEW: {
-                while (*playlistCollected != NULL && *playlistCount > 0 && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
-                    playlistGoTo((*playlistCollected)[identity]);
-                }
+                while (
+                    *playlistCollected != NULL
+                    && *playlistCount > 0
+                    && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID
+                    && (state = playlistGoTo((*playlistCollected)[identity])) > EOF
+                    && state < BACK
+                );
                 break;
             }
             case ADD: {
@@ -816,7 +837,10 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 break;
             }
             case DELETE: {
-                if (*playlistCollected != NULL && *playlistCount > 0 && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
+                if (*playlistCollected != NULL
+                    && *playlistCount > 0
+                    && (identity = playlistID(*playlistCollected, *playlistCount)) > EOF
+                ) {
                     delPlaylist(playlistCollected, playlistCount, identity);
                 }
             break;
@@ -829,12 +853,12 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 break;
             }
         }
-        if (identity == EOF) {
-            return KILL; 
+        if (identity == EOF || state == EOF) {
+            return KILL;
         }
         printMenu = 1;
-    } while (1);
-    return chosen;
+    } while (chosen != BACK);
+    return BACK;
 }
 
 
@@ -849,7 +873,7 @@ int main()
                 freePlaylist(playlistCollected[i]);
             }
         }
-         free(playlistCollected);
+        free(playlistCollected);
         playlistCollected = NULL;
     }
     printf("Goodbye!\n");
