@@ -140,14 +140,14 @@ char *getlineCustom(char **buffer, size_t *size) {
         // check if buffer needs expansion
         if ((len + 1) >= *size) {
             *size *= EXPANSION_FACTOR;
-            char *newBuffer = realloc(*buffer, *size);
-            if (newBuffer == NULL) {
+            char *temp = realloc(*buffer, *size);
+            if (temp == NULL) {
                 return NULL;
             }
             // while (!newBuffer) {
             //     newBuffer = realloc(*buffer, *size);
             // }
-            *buffer = newBuffer;
+            *buffer = temp;
         }
 
         // read input dynamically without length restriction
@@ -270,8 +270,8 @@ int readIntegerInput(const char* prompt)
     char confirm = '\0';
     do {
         printf("%s", prompt);
-        input = scanf(" %d%c", &value, &confirm);
-        if (input == 2 && confirm == '\n') {
+        // input = scanf(" %d%c", &value, &confirm);
+        if (scanf(" %d%c", &value, &confirm) == 2 && confirm == '\n') {
             break;
         }
         printf("Invalid option\n");
@@ -284,20 +284,41 @@ int readIntegerInput(const char* prompt)
 
 int compareByYear(const void *a, const void *b)
 {
-    return ((*(Song **)a)->year) - ((*(Song **)b)->year);
+    int yearA = (*(Song **)a)->year;
+    int yearB = (*(Song **)b)->year;
+    return (yearA > yearB) - (yearA < yearB);
 }
+
+// int compareByYear(const void *a, const void *b)
+// {
+//     return ((*(Song **)a)->year) - ((*(Song **)b)->year);
+// }
 
 
 int compareByStreamAscend(const void *a, const void *b)
 {
-    return ((*(Song **)a)->streams) - ((*(Song **)b)->streams);
+    int streamA = (*(Song **)a)->streams;
+    int streamB = (*(Song **)b)->streams;
+    return (streamA > streamB) - (streamA < streamB);
 }
+
+// int compareByStreamAscend(const void *a, const void *b)
+// {
+//     return ((*(Song **)a)->streams) - ((*(Song **)b)->streams);
+// }
 
 
 int compareByStreamDescend(const void *a, const void *b)
 {
-    return( (*(Song **)b)->streams) - ((*(Song **)a)->streams);
+    int streamA = (*(Song **)a)->streams;
+    int streamB = (*(Song **)b)->streams;
+    return (streamB > streamA) - (streamB < streamA);
 }
+
+// int compareByStreamDescend(const void *a, const void *b)
+// {
+//     return( (*(Song **)b)->streams) - ((*(Song **)a)->streams);
+// }
 
 
 int compareByTitle(const void *a, const void *b)
@@ -309,9 +330,12 @@ int compareByTitle(const void *a, const void *b)
 void insertionSort(Song **songs, int n, int (*comparator)(const void *, const void *))
 {
     for (int i = 1; i < n; i++) {
+        if (songs[i] == NULL) {
+            continue;
+        }
         Song *key = songs[i];
         int j = (i - 1);
-        while (j >= 0 && comparator(&songs[j], &key) > 0) {
+        while (j >= 0 && songs[j] != NULL && comparator(&songs[j], &key) > 0) {
             songs[j + 1] = songs[j];
             j--;
         }
@@ -319,26 +343,69 @@ void insertionSort(Song **songs, int n, int (*comparator)(const void *, const vo
     }
 }
 
+// void insertionSort(Song **songs, int n, int (*comparator)(const void *, const void *))
+// {
+//     for (int i = 1; i < n; i++) {
+//         Song *key = songs[i];
+//         int j = (i - 1);
+//         while (j >= 0 && comparator(&songs[j], &key) > 0) {
+//             songs[j + 1] = songs[j];
+//             j--;
+//             if (j < 0) {
+//                 break;
+//             }
+//         }
+//         songs[j + 1] = key;
+//     }
+// }
+
 
 Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*comparator)(const void *, const void *))
 {
     Song **result = (Song **)malloc((leftCount + rightCount) * sizeof(Song *));
-    int i = 0, j = 0, k = 0;
+    if (result == NULL) {
+        printf("Invalid option\n");
+        return NULL;
+    }
+    int
+        i = 0,
+        j = 0,
+        k = 0;
     while (i < leftCount && j < rightCount) {
-        if (comparator(&left[i], &right[j]) <= 0) {
+        if (left[i] != NULL && right[j] != NULL && comparator(&left[i], &right[j]) <= 0) {
             result[k++] = left[i++];
         } else {
             result[k++] = right[j++];
         }
     }
-    while (i < leftCount) {
+    while (i < leftCount && left[i] != NULL) {
         result[k++] = left[i++];
     }
-    while (j < rightCount) {
+    while (j < rightCount && right[j] != NULL) {
         result[k++] = right[j++];
     }
     return result;
 }
+
+// Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*comparator)(const void *, const void *))
+// {
+//     Song **result = (Song **)malloc((leftCount + rightCount) * sizeof(Song *));
+//     int i = 0, j = 0, k = 0;
+//     while (i < leftCount && j < rightCount) {
+//         if (comparator(&left[i], &right[j]) <= 0) {
+//             result[k++] = left[i++];
+//         } else {
+//             result[k++] = right[j++];
+//         }
+//     }
+//     while (i < leftCount) {
+//         result[k++] = left[i++];
+//     }
+//     while (j < rightCount) {
+//         result[k++] = right[j++];
+//     }
+//     return result;
+// }
 
 
 Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void *))
@@ -346,14 +413,32 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
     if (n < 2) {
         return songs;
     }
-    int mid = n / 2;
+    int mid = (n / 2);
     Song **left = mergeSort(songs, mid, comparator);
     Song **right = mergeSort((songs + mid), (n - mid), comparator);
     Song **sorted = merge(left, mid, right, (n - mid), comparator);
+    if (sorted == NULL) {
+        printf("Memory allocation failed during merge.\n");
+        return songs;
+    }
     memcpy(songs, sorted, (n * sizeof(Song *)));
     free(sorted);
     return songs;
 }
+
+// Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void *))
+// {
+//     if (n < 2) {
+//         return songs;
+//     }
+//     int mid = n / 2;
+//     Song **left = mergeSort(songs, mid, comparator);
+//     Song **right = mergeSort((songs + mid), (n - mid), comparator);
+//     Song **sorted = merge(left, mid, right, (n - mid), comparator);
+//     memcpy(songs, sorted, (n * sizeof(Song *)));
+//     free(sorted);
+//     return songs;
+// }
 
 
 void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void *))
@@ -361,9 +446,21 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
     if (n <= SMALL_DATASET_THRESHOLD) {
         insertionSort(songs, n, comparator);
     } else {
-        songs = mergeSort(songs, n, comparator);
+        Song **sorted = mergeSort(songs, n, comparator);
+        if (sorted != NULL) {
+            memcpy(songs, sorted, n * sizeof(Song *));
+        }
     }
 }
+
+// void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void *))
+// {
+//     if (n <= SMALL_DATASET_THRESHOLD) {
+//         insertionSort(songs, n, comparator);
+//     } else {
+//         songs = mergeSort(songs, n, comparator);
+//     }
+// }
 
 
 void songSort (Playlist *playlist)
@@ -631,7 +728,8 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     }
 
     Playlist *newPlaylist = malloc(sizeof(Playlist));
-    if (!newPlaylist) {
+    if (newPlaylist == NULL) {
+    // if (!newPlaylist) {
         free(playlistName);
         printf("Invalid option\n");
         return;
@@ -640,7 +738,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     newPlaylist->name = strdupCustom(playlistName);
     free(playlistName);
 
-    if (!newPlaylist->name) {
+    if (newPlaylist->name == NULL) {
         free(newPlaylist);
         printf("Invalid option\n");
         return;
