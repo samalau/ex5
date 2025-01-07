@@ -454,37 +454,45 @@ int songSelect(char action[], int songCount)
         chosen = QUIT,
         input = INVALID;
 
-    do {
-        printf("choose a song to %s, or 0 to quit:\n", action);
-        if (((input = scanf(" %d", &chosen) == 1) && chosen >= QUIT && chosen <= songCount) || songCount <= 0) {
-            break;
-        }
-        printf("Invalid option\n");
+    printf("choose a song to %s, or 0 to quit:\n", action);
+    if ((input = scanf(" %d", &chosen)) == EOF) {
+        return EOF;
+    }
+    if (input == 0 || chosen < QUIT || chosen > songCount) {
         scanf("%*[^\n]");
         scanf("%*c");
-    } while (1);
-    if (songCount <= 0) {
+        printf("Invalid option\n");
+        return songSelect(action, songCount);
+    }
+    if (chosen == QUIT || songCount <= 0) {
         return QUIT;
     }
-    return chosen;
+    if (chosen > QUIT && chosen <= songCount) {
+        return (chosen -1);
+    }
 }
 
 
 int playlistID(Playlist **playlistCollected, int playlistCount)
 {
     int
-        menuNumber = 0,
+        menuNumber = 1,
+        input = 0,
         chosen = INVALID;
     do {
         printf("Choose a playlist:\n");
-        menuNumber = 0;
-
-        for (menuNumber = 1; menuNumber <= playlistCount; menuNumber++) {
-            printf("%d. %s\n", menuNumber, playlistCollected[menuNumber - 1]->name);
+        if (playlistCount > 0) {
+            int i = 0;
+            for (i = 0; i < playlistCount; i++) {
+                printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
+            }
+            menuNumber = (i < 1) ? 1 : i;
         }
         printf("%d. Back to main menu\n", menuNumber);
-
-        if (scanf(" %d", &chosen) != 1 || chosen <= (menuNumber - menuNumber) || chosen > menuNumber) {
+        if (input = scanf(" %d", &chosen) != 1 || chosen < VALID || chosen > menuNumber) {
+            if (input == EOF) {
+                return EOF;
+            }
             chosen = INVALID;
             scanf("%*[^\n]");
             scanf("%*c");
@@ -497,7 +505,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         }
         break;
     } while (1);
-    return chosen;
+    return (chosen - 1);
 }
 
 
@@ -795,9 +803,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 
         switch (chosen) {
             case VIEW: {
-                while (*playlistCollected != NULL && *playlistCount > 0 && (identity = playlistID(*playlistCollected, *playlistCount)) && identity >= 1) {
-                    int identityIndex = (identity - 1);
-                    playlistGoTo((*playlistCollected)[identityIndex]);
+                while (*playlistCollected != NULL && *playlistCount > 0 && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
+                    playlistGoTo((*playlistCollected)[identity]);
                 }
                 break;
             }
@@ -806,9 +813,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 break;
             }
             case DELETE: {
-                if (*playlistCollected != NULL && *playlistCount > 0 && (identity = playlistID(*playlistCollected, *playlistCount)) != INVALID && identity >= 1) {
-                    int identityIndex = (identity - 1);
-                    delPlaylist(playlistCollected, playlistCount, identityIndex);
+                if (*playlistCollected != NULL && *playlistCount > 0 && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
+                    delPlaylist(playlistCollected, playlistCount, identity);
                 }
             break;
             }
@@ -819,6 +825,9 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 printf("Invalid option\n");
                 break;
             }
+        }
+        if (identity == EOF) {
+            return KILL; 
         }
         printMenu = 1;
     } while (1);
