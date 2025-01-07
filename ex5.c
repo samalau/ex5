@@ -114,7 +114,7 @@ void freeSong(Song *song)
     song->lyrics = NULL;
 
     free(song);
-    song = NULL;
+    // song = NULL;
 }
 
 
@@ -136,11 +136,15 @@ void freePlaylist(Playlist *p)
     p->name = NULL;
 
     free(p);
-    p = NULL;
+    // p = NULL;
 }
 
 
 char *getlineCustom(char **buffer, size_t *size) {
+    if (buffer == NULL || size == NULL) {
+        printf("Invalid option\n");
+        return NULL;
+    }
     if (*buffer == NULL) {
         *size = INITIAL_BUFFER_SIZE;
         *buffer = calloc(*size, sizeof(char));
@@ -179,7 +183,7 @@ char *getlineCustom(char **buffer, size_t *size) {
         }
 
         // reset buffer content if invalid input or empty buffer
-        if (inputRead != 1 || len == 0) {
+        if (inputRead != 1 || (inputRead == 1 && (*buffer)[0] == '\0')) {
             free(*buffer);
             *buffer = NULL;
             printf("Invalid input\n");
@@ -629,14 +633,17 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     }
 
     newPlaylist->name = strdupCustom(playlistName);
-    free(playlistName);
-    playlistName = NULL;
 
     if (newPlaylist->name == NULL) {
+        free(playlistName);
+        playlistName = NULL;
         free(newPlaylist);
         printf("Invalid option\n");
         return;
     }
+
+    free(playlistName);
+    playlistName = NULL;
 
     newPlaylist->songs = NULL;
     newPlaylist->songsNum = 0;
