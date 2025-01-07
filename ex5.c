@@ -119,15 +119,11 @@ void freePlaylist(Playlist *p)
 
 
 char *getlineCustom(char **buffer, size_t *size) {
-    // if (*buffer == NULL) {
-    //     *size = INITIAL_BUFFER_SIZE;
-    //     *buffer = calloc(*size, sizeof(char));
-    //     while (!*buffer) {
-    //         *buffer = calloc(*size, sizeof(char));
     if (*buffer == NULL) {
         *size = INITIAL_BUFFER_SIZE;
         *buffer = calloc(*size, sizeof(char));
         if (*buffer == NULL) {
+            printf("Invalid option\n");
             return NULL;
         }
     }
@@ -143,6 +139,7 @@ char *getlineCustom(char **buffer, size_t *size) {
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
                 free(*buffer);
+                *buffer = NULL;
                 printf("Invalid option\n");
                 return NULL;
             }
@@ -161,7 +158,10 @@ char *getlineCustom(char **buffer, size_t *size) {
 
         // reset buffer content if invalid input or empty buffer
         if (inputRead != 1 || len == 0) {
-            (*buffer)[0] = '\0';
+            free(*buffer);
+            *buffer = NULL;
+            printf("Invalid input\n");
+            return NULL;
         }
 
         // shrink buffer if usage drops below the threshold
@@ -170,20 +170,13 @@ char *getlineCustom(char **buffer, size_t *size) {
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
                 free(*buffer);
+                *buffer = NULL;
                 printf("Invalid option\n");
                 return NULL;
             }
             *buffer = temp;
         }
     } while (inputRead != 1 || len == 0);
-    //         *buffer = realloc(*buffer, *size);
-    //         while (!*buffer) {
-    //             *buffer = realloc(*buffer, *size);
-    //         }
-    //     }
-
-    // } while (inputRead != 1 || len == 0);
-
     return *buffer;
 }
 
@@ -202,27 +195,6 @@ char *strdupCustom(const char *s)
     memcpy(copy, s, len);
     return copy;
 }
-
-// char *strdupCustom(const char *s)
-// {
-//     if (s == NULL) {
-//         return NULL;
-//     }
-
-//     size_t len = (strlen(s) + 1);
-//     char *copy = NULL;
-//     copy = malloc(len);
-//     if (copy == NULL) {
-//         return NULL;
-//     }
-//     // while ((copy = malloc(len)) == NULL) {
-//     // // char *copy = malloc(len);
-//     // // if (!copy) {
-//     // //     return NULL;
-//     // }
-//     memcpy(copy, s, len);
-//     return copy;
-// }
 
 
 char* readStringInput(const char* prompt) {
@@ -244,26 +216,6 @@ char* readStringInput(const char* prompt) {
     return buffer;
 }
 
-// char* readStringInput(const char* prompt)
-// {
-//     char *buffer = NULL;
-//     size_t size = 0;
-//     int validInput = 0;
-
-//     do {
-//         printf("%s", prompt);
-//         if (getlineCustom(&buffer, &size) != NULL && buffer[0] != '\0') {
-//             validInput = 1;
-//         } else {
-//             printf("Invalid option\n");
-//             free(buffer);
-//             buffer = NULL;
-//         }
-//     } while (!validInput);
-
-//     return buffer;
-// }
-
 
 int readIntegerInput(const char* prompt)
 {
@@ -273,7 +225,6 @@ int readIntegerInput(const char* prompt)
     char confirm = '\0';
     do {
         printf("%s", prompt);
-        // input = scanf(" %d%c", &value, &confirm);
         if (scanf(" %d%c", &value, &confirm) == 2 && confirm == '\n') {
             break;
         }
@@ -292,11 +243,6 @@ int compareByYear(const void *a, const void *b)
     return (yearA > yearB) - (yearA < yearB);
 }
 
-// int compareByYear(const void *a, const void *b)
-// {
-//     return ((*(Song **)a)->year) - ((*(Song **)b)->year);
-// }
-
 
 int compareByStreamAscend(const void *a, const void *b)
 {
@@ -305,11 +251,6 @@ int compareByStreamAscend(const void *a, const void *b)
     return (streamA > streamB) - (streamA < streamB);
 }
 
-// int compareByStreamAscend(const void *a, const void *b)
-// {
-//     return ((*(Song **)a)->streams) - ((*(Song **)b)->streams);
-// }
-
 
 int compareByStreamDescend(const void *a, const void *b)
 {
@@ -317,11 +258,6 @@ int compareByStreamDescend(const void *a, const void *b)
     int streamB = (*(Song **)b)->streams;
     return (streamB > streamA) - (streamB < streamA);
 }
-
-// int compareByStreamDescend(const void *a, const void *b)
-// {
-//     return( (*(Song **)b)->streams) - ((*(Song **)a)->streams);
-// }
 
 
 int compareByTitle(const void *a, const void *b)
@@ -345,23 +281,6 @@ void insertionSort(Song **songs, int n, int (*comparator)(const void *, const vo
         songs[j + 1] = key;
     }
 }
-
-// void insertionSort(Song **songs, int n, int (*comparator)(const void *, const void *))
-// {
-//     for (int i = 1; i < n; i++) {
-//         Song *key = songs[i];
-//         int j = (i - 1);
-//         while (j >= 0 && comparator(&songs[j], &key) > 0) {
-//             songs[j + 1] = songs[j];
-//             j--;
-//             if (j < 0) {
-//                 break;
-//             }
-//         }
-//         songs[j + 1] = key;
-//     }
-// }
-
 
 Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*comparator)(const void *, const void *))
 {
@@ -390,26 +309,6 @@ Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*com
     return result;
 }
 
-// Song **merge(Song **left, int leftCount, Song **right, int rightCount, int (*comparator)(const void *, const void *))
-// {
-//     Song **result = (Song **)malloc((leftCount + rightCount) * sizeof(Song *));
-//     int i = 0, j = 0, k = 0;
-//     while (i < leftCount && j < rightCount) {
-//         if (comparator(&left[i], &right[j]) <= 0) {
-//             result[k++] = left[i++];
-//         } else {
-//             result[k++] = right[j++];
-//         }
-//     }
-//     while (i < leftCount) {
-//         result[k++] = left[i++];
-//     }
-//     while (j < rightCount) {
-//         result[k++] = right[j++];
-//     }
-//     return result;
-// }
-
 
 Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void *))
 {
@@ -429,20 +328,6 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
     return songs;
 }
 
-// Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void *))
-// {
-//     if (n < 2) {
-//         return songs;
-//     }
-//     int mid = n / 2;
-//     Song **left = mergeSort(songs, mid, comparator);
-//     Song **right = mergeSort((songs + mid), (n - mid), comparator);
-//     Song **sorted = merge(left, mid, right, (n - mid), comparator);
-//     memcpy(songs, sorted, (n * sizeof(Song *)));
-//     free(sorted);
-//     return songs;
-// }
-
 
 void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void *))
 {
@@ -455,15 +340,6 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
         }
     }
 }
-
-// void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void *))
-// {
-//     if (n <= SMALL_DATASET_THRESHOLD) {
-//         insertionSort(songs, n, comparator);
-//     } else {
-//         songs = mergeSort(songs, n, comparator);
-//     }
-// }
 
 
 void songSort (Playlist *playlist)
@@ -548,7 +424,6 @@ int songSelect(char action[], int songCount)
         if (songCount <= 0 || ((input = scanf(" %d", &chosen) == 1) && chosen >= QUIT && chosen <= songCount)) {
             break;
         }
-        // chosen = INVALID;
         printf("Invalid option\n");
         scanf("%*[^\n]");
         scanf("%*c");
@@ -609,29 +484,6 @@ void delSong(Song ***songCollected, int *songCount, int songIndex)
         }
     }
 }
-    // Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
-    // if (temp != NULL || *songCount == 1) {
-    //     *songCollected = temp;
-    //     (*songCount)--;
-    // }
-    // Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
-    // if (temp != NULL || *songCount - 1 == 0) {
-    //     *songCollected = temp;
-    //     (*songCount)--;
-    // }
-// }
-
-// void delSong(Song ***songCollected, int *songCount, int songIndex)
-// {
-//     freeSong((*songCollected)[songIndex]);
-
-//     for (int i = songIndex; i < *songCount - 1; i++) {
-//         (*songCollected)[i] = (*songCollected)[i + 1];
-//     }
-
-//     *songCollected = (Song **)realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
-//     (*songCount)--;
-// }
 
 
 void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
@@ -656,48 +508,6 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
         }
     }
 }
-
-// void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
-// {
-//     freePlaylist((*playlistCollected)[playlistIndex]);
-
-//     for (int i = playlistIndex; i < *playlistCount - 1; i++) {
-//         (*playlistCollected)[i] = (*playlistCollected)[i + 1];
-//     }
-//     if (*playlistCount == 1) {
-//         free(*playlistCollected);
-//         *playlistCollected = NULL;
-//         (*playlistCount)--;
-//     } else {
-//         Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
-//         if (temp != NULL) {
-//             *playlistCollected = temp;
-//             (*playlistCount)--;
-//         }
-//     }
-    // Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
-    // if (temp != NULL || *playlistCount == 1) {
-    //     *playlistCollected = temp;
-    //     (*playlistCount)--;
-    // }
-    // Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
-    // if (temp != NULL || *playlistCount - 1 == 0) {
-    //     *playlistCollected = temp;
-    //     (*playlistCount)--;
-    // }
-// }
-
-// void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
-// {
-//     freePlaylist((*playlistCollected)[playlistIndex]);
-
-//     for (int i = playlistIndex; i < *playlistCount - 1; i++) {
-//         (*playlistCollected)[i] = (*playlistCollected)[i + 1];
-//     }
-
-//     *playlistCollected = (Playlist **)realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
-//     (*playlistCount)--;
-// }
 
 
 void addSong(Song ***songCollected, int *songCount)
@@ -732,12 +542,6 @@ void addSong(Song ***songCollected, int *songCount)
         addSong(songCollected, songCount);
     }
     *songCollected = temp;
-    // *songCollected = (Song **)realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
-    // if (!*songCollected) {
-    //     freeSong(newSong);
-    //     printf("Invalid option\n");
-    //     return;
-    // }
     (*songCollected)[*songCount] = newSong;
     (*songCount)++;
 }
@@ -841,10 +645,6 @@ void playlistGoTo(Playlist *playlist)
                         playSong(chosenIndex, playlistCurrent->songs);
                     }
                 } while (chosen != QUIT);
-                // while ((chosen = songSelect("play", playlistCurrent->songsNum)) != INVALID && chosen != QUIT) {
-                //     
-                //     playSong(chosenIndex, playlistCurrent->songs);
-                // }
                 break;
             }
             case ADD: {
