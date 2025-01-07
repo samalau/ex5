@@ -476,6 +476,7 @@ int songSelect(char action[], int songCount)
     if (chosen > QUIT && chosen <= songCount) {
         return (--chosen);
     }
+    return EOF;
 }
 
 
@@ -498,7 +499,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
 
     printf("%d. Back to main menu\n", menuNumber);
 
-    if (input = scanf(" %d", &chosen) == EOF) {
+    if ((input = scanf(" %d", &chosen)) == EOF) {
         return EOF;
     }
 
@@ -510,12 +511,13 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         scanf("%*[^\n]");
         scanf("%*c");
         printf("Invalid option\n");
-        return songSelect(playlistCollected, playlistCount);
+        return playlistID(playlistCollected, playlistCount);
     }
     
     if (chosen > 1 && chosen <= playlistCount) {
         return (--chosen);
     }
+    return EOF;
 }
 
 
@@ -681,7 +683,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
 int playlistGoTo(Playlist *playlist)
 {
     if (playlist == NULL) {
-        return;
+        return BACK;
     }
     int
         chosen = BACK,
@@ -780,6 +782,7 @@ int playlistGoTo(Playlist *playlist)
         }
     printMenu = 1;
     } while (1);
+    return BACK;
 }
 
 
