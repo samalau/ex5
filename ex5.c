@@ -36,6 +36,7 @@ Assignment: ex5
 #define GO_HOME (-2)
 #define INVALID (-1)
 #define QUIT 0
+#define VALID 1
 #define KILL 4
 
 #define SMALL_DATASET_THRESHOLD 10
@@ -100,21 +101,42 @@ int home(Playlist ***playlistCollected, int *playlistCount);
 
 void freeSong(Song *song)
 {
+    if (song == NULL) {
+        return;
+    }
     free(song->title);
+    song->title = NULL;
+
     free(song->artist);
+    song->artist = NULL;
+
     free(song->lyrics);
+    song->lyrics = NULL;
+
     free(song);
+    song = NULL;
 }
 
 
 void freePlaylist(Playlist *p)
 {
+    if (p == NULL) {
+        return;
+    }
     for (int i = 0; i < p->songsNum; i++) {
-        freeSong(p->songs[i]);
+        if (p->songs[i] != NULL) {
+            freeSong(p->songs[i]);
+            p->songs[i] = NULL;
+        }
     }
     free(p->songs);
+    p->songs = NULL;
+
     free(p->name);
+    p->name = NULL;
+
     free(p);
+    p = NULL;
 }
 
 
