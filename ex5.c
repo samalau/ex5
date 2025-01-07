@@ -6,7 +6,6 @@ Assignment: ex5
 
 // TODO: EOF
 // TODO: comments
-// TODO: streams
 // TODO: enumerate macros
 
 
@@ -169,9 +168,6 @@ char *getlineCustom(char **buffer, size_t *size) {
                 printf("Invalid option\n");
                 return NULL;
             }
-            // while (!newBuffer) {
-            //     newBuffer = realloc(*buffer, *size);
-            // }
             *buffer = temp;
         }
 
@@ -186,7 +182,7 @@ char *getlineCustom(char **buffer, size_t *size) {
         if (inputRead != 1 || (inputRead == 1 && (*buffer)[0] == '\0')) {
             free(*buffer);
             *buffer = NULL;
-            printf("Invalid input\n");
+            printf("Invalid option\n");
             return NULL;
         }
 
@@ -247,7 +243,6 @@ int readIntegerInput(const char* prompt)
 {
     int
         value = INVALID;
-        // input = INVALID;
     char confirm = '\0';
     do {
         printf("%s", prompt);
@@ -461,13 +456,16 @@ int songSelect(char action[], int songCount)
 
     do {
         printf("choose a song to %s, or 0 to quit:\n", action);
-        if (songCount <= 0 || ((input = scanf(" %d", &chosen) == 1) && chosen >= QUIT && chosen <= songCount)) {
+        if (((input = scanf(" %d", &chosen) == 1) && chosen >= QUIT && chosen <= songCount) || songCount <= 0) {
             break;
         }
         printf("Invalid option\n");
         scanf("%*[^\n]");
         scanf("%*c");
     } while (1);
+    if (songCount <= 0) {
+        return QUIT;
+    }
     return chosen;
 }
 
