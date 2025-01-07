@@ -455,9 +455,11 @@ int songSelect(char action[], int songCount)
         input = INVALID;
 
     printf("choose a song to %s, or 0 to quit:\n", action);
+
     if ((input = scanf(" %d", &chosen)) == EOF) {
         return EOF;
     }
+
     if (input == 0 || chosen < QUIT || chosen > songCount) {
         scanf("%*[^\n]");
         scanf("%*c");
@@ -468,7 +470,7 @@ int songSelect(char action[], int songCount)
         return QUIT;
     }
     if (chosen > QUIT && chosen <= songCount) {
-        return (chosen -1);
+        return (--chosen);
     }
 }
 
@@ -479,33 +481,34 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         menuNumber = 1,
         input = 0,
         chosen = INVALID;
-    do {
-        printf("Choose a playlist:\n");
-        if (playlistCount > 0) {
-            int i = 0;
-            for (i = 0; i < playlistCount; i++) {
-                printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
-            }
-            menuNumber = (i < 1) ? 1 : i;
-        }
-        printf("%d. Back to main menu\n", menuNumber);
-        if (input = scanf(" %d", &chosen) != 1 || chosen < VALID || chosen > menuNumber) {
-            if (input == EOF) {
-                return EOF;
-            }
-            chosen = INVALID;
-            scanf("%*[^\n]");
-            scanf("%*c");
-            printf("Invalid option\n");
-            continue;
-        }
+    
+    printf("Choose a playlist:\n");
 
-        if (chosen == menuNumber) {
-            return GO_HOME;
+    if (playlistCount > 0) {
+        int i = 0;
+        for (i = 0; i < playlistCount; i++) {
+            printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
         }
-        break;
-    } while (1);
-    return (chosen - 1);
+        menuNumber = (i < 1) ? 1 : i;
+    }
+    
+    printf("%d. Back to main menu\n", menuNumber);
+
+    if (input = scanf(" %d", &chosen) != 1 || chosen < VALID || chosen > menuNumber) {
+        if (input == EOF) {
+            return EOF;
+        }
+        chosen = INVALID;
+        scanf("%*[^\n]");
+        scanf("%*c");
+        printf("Invalid option\n");
+        return playlistID(playlistCollected, playlistCount);
+    }
+
+    if (chosen == menuNumber) {
+        return GO_HOME;
+    }
+    return (--chosen);
 }
 
 
