@@ -119,11 +119,14 @@ void freePlaylist(Playlist *p)
 
 
 char *getlineCustom(char **buffer, size_t *size) {
+    // if (*buffer == NULL) {
+    //     *size = INITIAL_BUFFER_SIZE;
+    //     *buffer = calloc(*size, sizeof(char));
+    //     while (!*buffer) {
+    //         *buffer = calloc(*size, sizeof(char));
     if (*buffer == NULL) {
-        *size = INITIAL_BUFFER_SIZE;
-        *buffer = calloc(*size, sizeof(char));
-        while (!*buffer) {
-            *buffer = calloc(*size, sizeof(char));
+    *size = INITIAL_BUFFER_SIZE;
+    while ((*buffer = calloc(*size, sizeof(char))) == NULL) {
         }
     }
 
@@ -177,9 +180,11 @@ char *strdupCustom(const char *s)
     }
 
     size_t len = (strlen(s) + 1);
-    char *copy = malloc(len);
-    if (!copy) {
-        return NULL;
+    char *copy = NULL;
+    while ((copy = malloc(len)) == NULL) {
+    // char *copy = malloc(len);
+    // if (!copy) {
+    //     return NULL;
     }
     memcpy(copy, s, len);
     return copy;
@@ -402,28 +407,19 @@ void songID(Song **songCollected, int songCount)
 int songSelect(char action[], int songCount)
 {
     int
-        chosen = INVALID,
+        chosen = QUIT,
         input = INVALID;
 
     do {
         printf("choose a song to %s, or 0 to quit:\n", action);
-        input = scanf(" %d", &chosen);
-
-        if (songCount == 0 || chosen == QUIT) {
-            if (input != 1) {
-                scanf("%*[^\n]");
-                scanf("%*c");
-            }
-            return QUIT;
+        if (songCount <= 0 || (input = scanf(" %d", &chosen) && chosen >= QUIT && chosen <= songCount)) {
+            return chosen;
         }
-        if (input != 1 || chosen < 0 || chosen > songCount) {
-            chosen = INVALID;
-            printf("Invalid option\n");
-            scanf("%*[^\n]");
-            scanf("%*c");
-        }
+        chosen = INVALID;
+        printf("Invalid option\n");
+        scanf("%*[^\n]");
+        scanf("%*c");
     } while (chosen == INVALID);
-
     return chosen;
 }
 
@@ -442,7 +438,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         }
         printf("%d. Back to main menu\n", menuNumber);
 
-        if (scanf(" %d", &chosen) != 1 || chosen < 1 || chosen > menuNumber) {
+        if (scanf(" %d", &chosen) != 1 || chosen < (menuNumber - menuNumber) || chosen > menuNumber) {
             chosen = INVALID;
             scanf("%*[^\n]");
             scanf("%*c");
@@ -466,9 +462,24 @@ void delSong(Song ***songCollected, int *songCount, int songIndex)
         (*songCollected)[i] = (*songCollected)[i + 1];
     }
 
-    *songCollected = (Song **)realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
-    (*songCount)--;
+    Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
+    if (temp != NULL || *songCount - 1 == 0) {
+        *songCollected = temp;
+        (*songCount)--;
+    }
 }
+
+// void delSong(Song ***songCollected, int *songCount, int songIndex)
+// {
+//     freeSong((*songCollected)[songIndex]);
+
+//     for (int i = songIndex; i < *songCount - 1; i++) {
+//         (*songCollected)[i] = (*songCollected)[i + 1];
+//     }
+
+//     *songCollected = (Song **)realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
+//     (*songCount)--;
+// }
 
 
 void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
@@ -479,9 +490,24 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
         (*playlistCollected)[i] = (*playlistCollected)[i + 1];
     }
 
-    *playlistCollected = (Playlist **)realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
-    (*playlistCount)--;
+    Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
+    if (temp != NULL || *playlistCount - 1 == 0) {
+        *playlistCollected = temp;
+        (*playlistCount)--;
+    }
 }
+
+// void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
+// {
+//     freePlaylist((*playlistCollected)[playlistIndex]);
+
+//     for (int i = playlistIndex; i < *playlistCount - 1; i++) {
+//         (*playlistCollected)[i] = (*playlistCollected)[i + 1];
+//     }
+
+//     *playlistCollected = (Playlist **)realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
+//     (*playlistCount)--;
+// }
 
 
 void addSong(Song ***songCollected, int *songCount)
@@ -642,7 +668,7 @@ void playlistGoTo(Playlist *playlist)
             }
         }
     printMenu = 1;
-    } while (chosen != QUIT);
+    } while (chosen != BACK);
 }
 
 
