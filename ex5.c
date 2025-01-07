@@ -25,6 +25,7 @@ Assignment: ex5
 #define EXPANSION_FACTOR 2
 #define SHRINK_THRESHOLD_FACTOR 2
 #define MAX_SCANF_INPUT (INITIAL_BUFFER_SIZE - 1)
+#define MAX_SCANF_INPUT_STR "4"
 
 #define SORT_BY_YEAR 1
 #define SORT_ASCEND_STREAM 2
@@ -117,8 +118,7 @@ void freePlaylist(Playlist *p)
 }
 
 
-char *getlineCustom(char **buffer, size_t *size)
-{
+char *getlineCustom(char **buffer, size_t *size) {
     if (*buffer == NULL) {
         *size = INITIAL_BUFFER_SIZE;
         *buffer = calloc(*size, sizeof(char));
@@ -128,51 +128,211 @@ char *getlineCustom(char **buffer, size_t *size)
     }
 
     size_t len = 0;
-    int inputRead;
+    int inputRead = 0;
 
-    size_t temp = MAX_SCANF_INPUT;
-    size_t digitCount = 0;
-    do {
-        digitCount++;
-        temp /= 10;
-    } while (temp > 0);
-
-    size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
-    char *formatStr = malloc(formatSize);
-    while (!formatStr) {
-        formatStr = malloc(formatSize);
-    }
-
-    sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
+    char formatStr[] = " %[^\n]";
 
     do {
-        if ((len + MAX_SCANF_INPUT + 1) >= *size) {
+        // check if buffer needs expansion
+        if ((len + 1) >= *size) {
             *size *= EXPANSION_FACTOR;
             char *newBuffer = realloc(*buffer, *size);
-            if (!newBuffer) {
-                free(formatStr);
-                return NULL;
+            while (!newBuffer) {
+                newBuffer = realloc(*buffer, *size);
             }
             *buffer = newBuffer;
         }
 
+        // read input dynamically without length restriction
         inputRead = scanf(formatStr, (*buffer + len));
 
         if (inputRead == 1) {
             len += strlen(*buffer + len);
         }
 
+        // reset buffer content if invalid input or empty buffer
         if (inputRead != 1 || len == 0) {
-            (*buffer)[0] = '\0';  
-            scanf("%*[^\n]");  
-            scanf("%*c");  
+            (*buffer)[0] = '\0';
+        }
+
+        // shrink buffer if usage drops below the threshold
+        if (len < (*size) / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
+            *size /= EXPANSION_FACTOR;
+            *buffer = realloc(*buffer, *size);
+            while (!*buffer) {
+                *buffer = realloc(*buffer, *size);
+            }
         }
 
     } while (inputRead != 1 || len == 0);
 
-    free(formatStr);
     return *buffer;
 }
+
+
+// char *getlineCustom(char **buffer, size_t *size) {
+//     if (*buffer == NULL) {
+//         *size = INITIAL_BUFFER_SIZE;
+//         *buffer = calloc(*size, sizeof(char));
+//         while (!*buffer) {
+//             *buffer = calloc(*size, sizeof(char));
+//         }
+//     }
+
+//     size_t len = 0;
+//     int inputRead = 0;
+
+//     // dynamically generate the format string based on buffer size
+//     char formatStr[20];  
+//     sprintf(formatStr, " %%%zu[^\n]", (*size) - 1);  
+
+//     do {
+//         // check if buffer needs expansion
+//         if ((len + (*size) - 1) >= *size) {
+//             *size *= EXPANSION_FACTOR;
+//             char *newBuffer = realloc(*buffer, *size);
+//             while (!newBuffer) {
+//                 newBuffer = realloc(*buffer, *size);
+//             }
+//             *buffer = newBuffer;
+//         }
+
+//         sprintf(formatStr, " %%%zu[^\n]", (*size) - len - 1);  
+//         inputRead = scanf(formatStr, (*buffer + len));
+
+//         if (inputRead == 1) {
+//             len += strlen(*buffer + len);
+//         }
+
+//         // no input or empty buffer
+//         if (inputRead != 1 || len == 0) {
+//             (*buffer)[0] = '\0';
+//         }
+
+//         // shrink the buffer if it's less than half full
+//         if (len < (*size) / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
+//             *size /= EXPANSION_FACTOR;
+//             *buffer = realloc(*buffer, *size);
+//             while (!*buffer) {
+//                 *buffer = realloc(*buffer, *size);
+//             }
+//         }
+
+//     } while (inputRead != 1 || len == 0);
+
+//     return *buffer;
+// }
+
+
+// char *getlineCustom(char **buffer, size_t *size) {
+//     if (*buffer == NULL) {
+//         *size = INITIAL_BUFFER_SIZE;
+//         *buffer = calloc(*size, sizeof(char));
+//         while (!*buffer) {
+//             *buffer = calloc(*size, sizeof(char));
+//         }
+//     }
+
+//     size_t len = 0;
+//     int inputRead = 0;
+//     size_t temp = MAX_SCANF_INPUT;
+//     size_t digitCount = 0;
+//     do {
+//         digitCount++;
+//         temp /= 10;
+//     } while (temp > 0);
+
+//     size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
+//     char *formatStr = malloc(formatSize);
+//     while (!formatStr) {
+//         formatStr = malloc(formatSize);
+//     }
+//     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
+
+//     do {
+//         if ((len + MAX_SCANF_INPUT + 1) >= *size) {
+//             *size *= EXPANSION_FACTOR;
+//             char *newBuffer = realloc(*buffer, *size);
+//             while (!newBuffer) {
+//                 newBuffer = realloc(*buffer, *size);
+//             }
+//             *buffer = newBuffer;
+//         }
+
+//         inputRead = scanf(formatStr, (*buffer + len));
+
+//         if (inputRead == 1) {
+//             len += strlen(*buffer + len);
+//         }
+
+//         if (inputRead != 1 || len == 0) {
+//             (*buffer)[0] = '\0';
+//         }
+
+//     } while (inputRead != 1 || len == 0);
+
+//     free(formatStr);
+//     return *buffer;
+// }
+
+
+// char *getlineCustom(char **buffer, size_t *size)
+// {
+//     if (*buffer == NULL) {
+//         *size = INITIAL_BUFFER_SIZE;
+//         *buffer = calloc(*size, sizeof(char));
+//         while (!*buffer) {
+//             *buffer = calloc(*size, sizeof(char));
+//         }
+//     }
+
+//     size_t len = 0;
+//     int input = 0;
+
+//     size_t temp = MAX_SCANF_INPUT;
+//     size_t digitCount = 0;
+//     do {
+//         digitCount++;
+//         temp /= 10;
+//     } while (temp > 0);
+
+//     size_t formatSize = sizeof(" %") + digitCount + sizeof("[^\n]");
+//     char *formatStr = malloc(formatSize);
+//     while (!formatStr) {
+//         formatStr = malloc(formatSize);
+//     }
+
+//     sprintf(formatStr, " %%%d[^\n]", MAX_SCANF_INPUT);
+
+//     do {
+//         if ((len + MAX_SCANF_INPUT + 1) >= *size) {
+//             *size *= EXPANSION_FACTOR;
+//             char *newBuffer = realloc(*buffer, *size);
+//             if (!newBuffer) {
+//                 free(formatStr);
+//                 return NULL;
+//             }
+//             *buffer = newBuffer;
+//         }
+
+//         input = scanf(" %*["MAX_SCANF_INPUT_STR"c]", (*buffer + len));
+//         // input = scanf(formatStr, (*buffer + len));
+
+//         if (input == 1) {
+//             len += strlen(*buffer + len);
+//         }
+
+//         if (input != 1 || len == 0) {
+//             (*buffer)[0] = '\0';  
+//             scanf("%*[^\n]");  
+//             scanf("%*c");  
+//         }
+
+//     } while (input != 1 || len == 0);
+
+//     free(formatStr);
+//     return *buffer;
+// }
 
 
 char *strdupCustom(const char *s)
@@ -191,8 +351,7 @@ char *strdupCustom(const char *s)
 }
 
 
-char* readStringInput(const char* prompt)
-{
+char* readStringInput(const char* prompt) {
     char *buffer = NULL;
     size_t size = 0;
     int validInput = 0;
@@ -211,11 +370,31 @@ char* readStringInput(const char* prompt)
     return buffer;
 }
 
+// char* readStringInput(const char* prompt)
+// {
+//     char *buffer = NULL;
+//     size_t size = 0;
+//     int validInput = 0;
+
+//     do {
+//         printf("%s", prompt);
+//         if (getlineCustom(&buffer, &size) != NULL && buffer[0] != '\0') {
+//             validInput = 1;
+//         } else {
+//             printf("Invalid option\n");
+//             free(buffer);
+//             buffer = NULL;
+//         }
+//     } while (!validInput);
+
+//     return buffer;
+// }
+
 
 int readIntegerInput(const char* prompt)
 {
     int
-        value,
+        value = INVALID,
         input = INVALID;
     char confirm = '\0';
     do {
@@ -359,7 +538,7 @@ void playSong(int songIndex, Song **songCollected)
 {
     printf("Now playing %s:\n", songCollected[songIndex]->title);
     printf("$ %s $\n", songCollected[songIndex]->lyrics);
-    // songCollected[songIndex]->streams
+    songCollected[songIndex]->streams++;
 }
 
 
@@ -367,8 +546,6 @@ void playAllSong(Song **songCollected, int songCount)
 {
     for (int songIndex = 0; songIndex < songCount; songIndex++) {
         playSong(songIndex, songCollected);
-        
-        
     }
 }
 
@@ -665,13 +842,12 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 
         if (option != 1) {
             chosen = INVALID;
+            scanf("%*[^\n]");
+            scanf("%*c");
             printMenu = 1;
         } else {
             printMenu = 0;
         }
-
-        scanf("%*[^\n]");
-        scanf("%*c");
 
         switch (chosen) {
             case VIEW: {
