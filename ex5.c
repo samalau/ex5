@@ -265,8 +265,8 @@ char* readStringInput(const char* prompt) {
 int readIntegerInput(const char* prompt)
 {
     int
-        value = INVALID,
-        input = INVALID;
+        value = INVALID;
+        // input = INVALID;
     char confirm = '\0';
     do {
         printf("%s", prompt);
@@ -542,14 +542,14 @@ int songSelect(char action[], int songCount)
 
     do {
         printf("choose a song to %s, or 0 to quit:\n", action);
-        if (songCount <= 0 || (input = scanf(" %d", &chosen) && chosen >= QUIT && chosen <= songCount)) {
-            return chosen;
+        if (songCount <= 0 || ((input = scanf(" %d", &chosen) == 1) && chosen >= QUIT && chosen <= songCount)) {
+            break;
         }
-        chosen = INVALID;
+        // chosen = INVALID;
         printf("Invalid option\n");
         scanf("%*[^\n]");
         scanf("%*c");
-    } while (chosen == INVALID);
+    } while (1);
     return chosen;
 }
 
