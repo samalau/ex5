@@ -125,14 +125,15 @@ char *getlineCustom(char **buffer, size_t *size) {
     //     while (!*buffer) {
     //         *buffer = calloc(*size, sizeof(char));
     if (*buffer == NULL) {
-    *size = INITIAL_BUFFER_SIZE;
-    while ((*buffer = calloc(*size, sizeof(char))) == NULL) {
+        *size = INITIAL_BUFFER_SIZE;
+        *buffer = calloc(*size, sizeof(char));
+        if (*buffer == NULL) {
+            return NULL;
         }
     }
 
     size_t len = 0;
     int inputRead = 0;
-
     char formatStr[] = " %[^\n]";
 
     do {
@@ -140,9 +141,12 @@ char *getlineCustom(char **buffer, size_t *size) {
         if ((len + 1) >= *size) {
             *size *= EXPANSION_FACTOR;
             char *newBuffer = realloc(*buffer, *size);
-            while (!newBuffer) {
-                newBuffer = realloc(*buffer, *size);
+            if (newBuffer == NULL) {
+                return NULL;
             }
+            // while (!newBuffer) {
+            //     newBuffer = realloc(*buffer, *size);
+            // }
             *buffer = newBuffer;
         }
 
@@ -161,13 +165,21 @@ char *getlineCustom(char **buffer, size_t *size) {
         // shrink buffer if usage drops below the threshold
         if (len < (*size) / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
             *size /= EXPANSION_FACTOR;
-            *buffer = realloc(*buffer, *size);
-            while (!*buffer) {
-                *buffer = realloc(*buffer, *size);
+            char *temp = realloc(*buffer, *size);
+            if (temp == NULL) {
+                printf("Invalid option\n");
+                return NULL;
             }
+            *buffer = temp;
         }
-
     } while (inputRead != 1 || len == 0);
+    //         *buffer = realloc(*buffer, *size);
+    //         while (!*buffer) {
+    //             *buffer = realloc(*buffer, *size);
+    //         }
+    //     }
+
+    // } while (inputRead != 1 || len == 0);
 
     return *buffer;
 }
@@ -178,17 +190,36 @@ char *strdupCustom(const char *s)
     if (s == NULL) {
         return NULL;
     }
-
-    size_t len = (strlen(s) + 1);
-    char *copy = NULL;
-    while ((copy = malloc(len)) == NULL) {
-    // char *copy = malloc(len);
-    // if (!copy) {
-    //     return NULL;
+    size_t len = strlen(s) + 1;
+    char *copy = malloc(len);
+    if (copy == NULL) {
+        printf("Invalid option\n");
+        return NULL;
     }
     memcpy(copy, s, len);
     return copy;
 }
+
+// char *strdupCustom(const char *s)
+// {
+//     if (s == NULL) {
+//         return NULL;
+//     }
+
+//     size_t len = (strlen(s) + 1);
+//     char *copy = NULL;
+//     copy = malloc(len);
+//     if (copy == NULL) {
+//         return NULL;
+//     }
+//     // while ((copy = malloc(len)) == NULL) {
+//     // // char *copy = malloc(len);
+//     // // if (!copy) {
+//     // //     return NULL;
+//     // }
+//     memcpy(copy, s, len);
+//     return copy;
+// }
 
 
 char* readStringInput(const char* prompt) {
@@ -376,9 +407,11 @@ void songSort (Playlist *playlist)
 
 void playSong(int songIndex, Song **songCollected)
 {
-    printf("Now playing %s:\n", songCollected[songIndex]->title);
-    printf("$ %s $\n", songCollected[songIndex]->lyrics);
-    songCollected[songIndex]->streams++;
+    if (songIndex >= 0 && songCollected != NULL && songCollected[songIndex] != NULL) {
+        printf("Now playing %s:\n", songCollected[songIndex]->title);
+        printf("$ %s $\n", songCollected[songIndex]->lyrics);
+        songCollected[songIndex]->streams++;
+    }
 }
 
 
@@ -462,11 +495,27 @@ void delSong(Song ***songCollected, int *songCount, int songIndex)
         (*songCollected)[i] = (*songCollected)[i + 1];
     }
 
-    Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
-    if (temp != NULL || *songCount - 1 == 0) {
-        *songCollected = temp;
+    if (*songCount == 1) {
+        free(*songCollected);
+        *songCollected = NULL;
         (*songCount)--;
+    } else {
+        Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
+        if (temp != NULL) {
+            *songCollected = temp;
+            (*songCount)--;
+        }
     }
+    // Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
+    // if (temp != NULL || *songCount == 1) {
+    //     *songCollected = temp;
+    //     (*songCount)--;
+    // }
+    // Song **temp = realloc(*songCollected, (*songCount - 1) * sizeof(Song *));
+    // if (temp != NULL || *songCount - 1 == 0) {
+    //     *songCollected = temp;
+    //     (*songCount)--;
+    // }
 }
 
 // void delSong(Song ***songCollected, int *songCount, int songIndex)
@@ -489,12 +538,27 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
     for (int i = playlistIndex; i < *playlistCount - 1; i++) {
         (*playlistCollected)[i] = (*playlistCollected)[i + 1];
     }
-
-    Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
-    if (temp != NULL || *playlistCount - 1 == 0) {
-        *playlistCollected = temp;
+    if (*playlistCount == 1) {
+        free(*playlistCollected);
+        *playlistCollected = NULL;
         (*playlistCount)--;
+    } else {
+        Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
+        if (temp != NULL) {
+            *playlistCollected = temp;
+            (*playlistCount)--;
+        }
     }
+    // Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
+    // if (temp != NULL || *playlistCount == 1) {
+    //     *playlistCollected = temp;
+    //     (*playlistCount)--;
+    // }
+    // Playlist **temp = realloc(*playlistCollected, (*playlistCount - 1) * sizeof(Playlist *));
+    // if (temp != NULL || *playlistCount - 1 == 0) {
+    //     *playlistCollected = temp;
+    //     (*playlistCount)--;
+    // }
 }
 
 // void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
@@ -535,12 +599,19 @@ void addSong(Song ***songCollected, int *songCount)
     // initialize stream count
     newSong->streams = 0;
 
-    *songCollected = (Song **)realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
-    if (!*songCollected) {
+    Song **temp = realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
+    if (temp == NULL) {
         freeSong(newSong);
         printf("Invalid option\n");
-        return;
+        addSong(songCollected, songCount);
     }
+    *songCollected = temp;
+    // *songCollected = (Song **)realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
+    // if (!*songCollected) {
+    //     freeSong(newSong);
+    //     printf("Invalid option\n");
+    //     return;
+    // }
     (*songCollected)[*songCount] = newSong;
     (*songCount)++;
 }
@@ -635,10 +706,18 @@ void playlistGoTo(Playlist *playlist)
         switch (chosen) {
             case VIEW: {
                 songID(playlistCurrent->songs, playlistCurrent->songsNum);
-                while ((chosen = songSelect("play", playlistCurrent->songsNum)) != INVALID && chosen != QUIT) {
-                    int chosenIndex = chosen - 1;
-                    playSong(chosenIndex, playlistCurrent->songs);
-                }
+
+                do {
+                    chosen = songSelect("play", playlistCurrent->songsNum);
+                    if (chosen != INVALID && chosen != QUIT) {
+                        int chosenIndex = chosen - 1;
+                        playSong(chosenIndex, playlistCurrent->songs);
+                    }
+                } while (chosen != QUIT);
+                // while ((chosen = songSelect("play", playlistCurrent->songsNum)) != INVALID && chosen != QUIT) {
+                //     
+                //     playSong(chosenIndex, playlistCurrent->songs);
+                // }
                 break;
             }
             case ADD: {
