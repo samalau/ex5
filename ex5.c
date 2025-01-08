@@ -504,6 +504,8 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
     }
 
     if (chosen == 1) {
+        scanf("%*[^\n]");
+        // scanf("%*c");
         return GO_HOME;
     }
 
@@ -682,9 +684,6 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
 
 int playlistGoTo(Playlist *playlist)
 {
-    if (playlist == NULL) {
-        return BACK;
-    }
     int
         chosen = BACK,
         identity = INVALID,
@@ -732,9 +731,6 @@ int playlistGoTo(Playlist *playlist)
                     if (identity > EOF) {
                         playSong(identity, playlistCurrent->songs);
                     }
-                    // if (identity < EOF) {
-                    //     break;
-                    // }
                 } while (identity > EOF);
                 break;
             }
@@ -752,9 +748,6 @@ int playlistGoTo(Playlist *playlist)
                 if (identity > EOF) {
                     delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, identity);
                 }
-                // if (identity < EOF) {
-                //     break;
-                // }
                 break;
             }
             case SORT: {
@@ -789,8 +782,8 @@ int playlistGoTo(Playlist *playlist)
 int home(Playlist ***playlistCollected, int *playlistCount)
 {
     int
-        state = INVALID,
-        identity = INVALID,
+        state = 0,
+        identity = 0,
         chosen = INVALID,
         option = QUIT,
         printMenu = 1;
@@ -826,13 +819,14 @@ int home(Playlist ***playlistCollected, int *playlistCount)
 
         switch (chosen) {
             case VIEW: {
-                while (
-                    *playlistCollected != NULL
-                    && *playlistCount > 0
-                    && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID
-                    && (state = playlistGoTo((*playlistCollected)[identity])) > EOF
-                    && state < BACK
-                );
+                while ((identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
+                    if (
+                        (state = playlistGoTo((*playlistCollected)[identity])) == EOF
+                        || state == BACK
+                    ) {
+                        break;
+                    }
+                }
                 break;
             }
             case ADD: {
