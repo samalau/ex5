@@ -100,57 +100,57 @@ int playlistGoTo(Playlist *playlist);
 int home(Playlist ***playlistCollected, int *playlistCount);
 
 
-void freeSong(Song *song)
+void freeSong(Song **song)
 {
-    if (song == NULL) {
+    if (song == NULL || *song == NULL) {
         return;
     }
 
-    if (song->title != NULL) {
-        free(song->title);
-        song->title = NULL;
+    if ((*song)->title != NULL) {
+        free((*song)->title);
+        (*song)->title = NULL;
     }
 
-    if (song->artist != NULL) {
-        free(song->artist);
-        song->artist = NULL;
+    if ((*song)->artist != NULL) {
+        free((*song)->artist);
+        (*song)->artist = NULL;
     }
 
-    if (song->lyrics != NULL) {
-        free(song->lyrics);
-        song->lyrics = NULL;
+    if ((*song)->lyrics != NULL) {
+        free((*song)->lyrics);
+        (*song)->lyrics = NULL;
     }
 
-    free(song);
-    song = NULL;
+    free((*song));
+    (*song) = NULL;
 }
 
 
-void freePlaylist(Playlist *p)
+void freePlaylist(Playlist **p)
 {
-    if (p == NULL) {
+    if (p == NULL || *p == NULL) {
         return;
     }
-    
-    for (int i = 0; i < p->songsNum; i++) {
-        if (p->songs[i] != NULL) {
-            freeSong(p->songs[i]);
-            p->songs[i] = NULL;
+
+    for (int i = 0; i < (*p)->songsNum; i++) {
+        if ((*p)->songs[i] != NULL) {
+            freeSong(&((*p)->songs[i]));
+            (*p)->songs[i] = NULL;
         }
     }
 
     if (p->songs != NULL) {
-        free(p->songs);
-        p->songs = NULL;
+        free((*p)->songs);
+        (*p)->songs = NULL;
     }
 
     if (p->name != NULL) {
-        free(p->name);
-        p->name = NULL;
+        free((*p)->name);
+        (*p)->name = NULL;
     }
 
-    free(p);
-    p = NULL;
+    free((*p));
+    (*p) = NULL;
 }
 
 
@@ -226,7 +226,8 @@ char *strdupCustom(const char *s)
         return NULL;
     }
     size_t len = strlen(s) + 1;
-    char *copy = malloc(len);
+    char *copy = calloc(len, sizeof(char));
+    // char *copy = malloc(len);
     if (copy == NULL) {
         printf("Invalid option\n");
         return NULL;
@@ -364,9 +365,11 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
     if (left == NULL || right == NULL) {
         if (left != NULL) {
             free(left);
+            left = NULL;
         }
         if (right != NULL) {
             free(right);
+            right = NULL;
         }
         printf("Invalid option\n");
         return NULL;
@@ -376,9 +379,11 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
     if (sorted == NULL) {
         if (left != NULL) {
             free(left);
+            left = NULL;
         }
         if (right != NULL) {
             free(right);
+            right = NULL;
         }
         printf("Invalid option\n");
         return NULL;
@@ -387,6 +392,7 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
     if (sorted != NULL) {
         memcpy(songs, sorted, n * sizeof(Song *));
         free(sorted);
+        sorted = NULL;
     }
 
     return songs;
@@ -402,6 +408,7 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
         if (sorted != NULL) {
             memcpy(songs, sorted, n * sizeof(Song *));
             free(sorted);
+            sorted = NULL;
         }
     }
 }
@@ -553,7 +560,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
 
 void delSong(Song ***songCollected, int *songCount, int songIndex)
 {
-    freeSong((*songCollected)[songIndex]);
+    freeSong(&((*songCollected)[songIndex]));
     (*songCollected)[songIndex] = NULL;
 
     for (int i = songIndex; i < *songCount - 1; i++) {
@@ -580,7 +587,7 @@ void delSong(Song ***songCollected, int *songCount, int songIndex)
 
 void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlistIndex)
 {
-    freePlaylist((*playlistCollected)[playlistIndex]);
+    freePlaylist(&((*playlistCollected)[playlistIndex]));
     (*playlistCollected)[playlistIndex] = NULL;
 
     for (int i = playlistIndex; i < *playlistCount - 1; i++) {
@@ -671,10 +678,24 @@ void addSong(Song ***songCollected, int *songCount)
     // Attempt to expand the song list
     Song **temp = realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
     if (temp == NULL) {
+        if (newSong->title != NULL) {
+            free(newSong->title);
+            newSong->title = NULL;
+        }
+        if (newSong->artist != NULL) {
+            free(newSong->artist);
+            newSong->artist = NULL;
+        }
+        if (newSong->lyrics != NULL) {
+            free(newSong->lyrics);
+            newSong->lyrics = NULL;
+        }
+        
         if (newSong != NULL) {
             free(newSong);
             newSong = NULL;
         }
+        
         printf("Invalid option\n");
         return;
     }
@@ -732,8 +753,8 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     newPlaylist->songs = NULL;
     newPlaylist->songsNum = 0;
 
-    Playlist **tempCollection = realloc(*playlistCollected, (*playlistCount + 1) * sizeof(Playlist *));
-    if (tempCollection == NULL) {
+    Playlist **temp = realloc(*playlistCollected, (*playlistCount + 1) * sizeof(Playlist *));
+    if (temp == NULL) {
         if (newPlaylist->name != NULL) {
             free(newPlaylist->name);
             newPlaylist->name = NULL;
@@ -746,7 +767,7 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
         return;
     }
 
-    *playlistCollected = tempCollection;
+    *playlistCollected = temp;
     (*playlistCollected)[*playlistCount] = newPlaylist;
     (*playlistCount)++;
 }
@@ -927,19 +948,18 @@ int main()
 {
     Playlist **playlistCollected = NULL;
     int playlistCount = 0;
+
     while ((home(&playlistCollected, &playlistCount)) != KILL);
-    if (playlistCollected != NULL) {
-        for (int i = 0; i < playlistCount; i++) {
-            if (playlistCollected[i] != NULL) {
-                freePlaylist(playlistCollected[i]);
-                playlistCollected[i] = NULL;
-            }
-        }
-        if (playlistCollected != NULL) {
-            free(playlistCollected);
-            playlistCollected = NULL;
-        }
+
+    for (int i = 0; i < playlistCount; i++) {
+        freePlaylist(&playlistCollected[i]);
     }
+    
+    if (playlistCollected != NULL) {
+        free(playlistCollected);
+        playlistCollected = NULL;
+    }
+
     printf("Goodbye!\n");
     return 0;
 }
