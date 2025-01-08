@@ -472,81 +472,91 @@ void songID(Song **songCollected, int songCount)
 
 int songSelect(char action[], int songCount)
 {
+    static int retry = 5;
+
     int
         chosen = QUIT,
         input = INVALID;
-    static int retry = 5;
+    
+    do {
+        printf("choose a song to %s, or 0 to quit:\n", action);
 
-    printf("choose a song to %s, or 0 to quit:\n", action);
+        if ((input = scanf(" %d", &chosen)) == EOF) {
+            return EOF;
+        }
 
-    if ((input = scanf(" %d", &chosen)) == EOF) {
-        return EOF;
-    }
+        if (chosen == QUIT || songCount <= 0 || retry <= 0) {
+            retry = 5;
+            return (QUIT - 2);
+        }
 
-    if (chosen == QUIT || songCount <= 0 || retry <= 0) {
-        retry = 5;
-        return (QUIT - 2);
-    }
+        if (input == 0 || chosen < QUIT || chosen > songCount) {
+            retry--;
+            scanf("%*[^\n]");
+            scanf("%*c");
+            printf("Invalid option\n");
+            return songSelect(action, songCount);
+        }
 
-    if (input == 0 || chosen < QUIT || chosen > songCount) {
-        retry--;
-        scanf("%*[^\n]");
-        scanf("%*c");
-        printf("Invalid option\n");
-        return songSelect(action, songCount);
-    }
-
-    if (chosen > QUIT && chosen <= songCount) {
-        retry = 5;
-        return (--chosen);
-    }
+        if (chosen > QUIT && chosen <= songCount) {
+            retry = 5;
+            return (--chosen);
+        }
+    } while (1);
     return EOF;
 }
 
 
 int playlistID(Playlist **playlistCollected, int playlistCount)
 {
+    static int retry = 5;
+
     int
         menuNumber = 1,
         input = 0,
         chosen = INVALID;
-    static int retry = 5;
     
-    printf("Choose a playlist:\n");
+    do {
+        menuNumber = 1;
+        input = 0;
+        chosen = INVALID;
 
-    if (playlistCount > 0) {
-        int i = 0;
-        for (i = 0; i < playlistCount; i++) {
-            printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
+        printf("Choose a playlist:\n");
+
+        if (playlistCount > 0) {
+            int i = 0;
+            for (i = 0; i < playlistCount; i++) {
+                printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
+            }
+            menuNumber = (i <= 1) ? 1 : i + 1;
         }
-        menuNumber = (i <= 1) ? 1 : i + 1;
-    }
 
-    printf("%d. Back to main menu\n", menuNumber);
+        printf("%d. Back to main menu\n", menuNumber);
 
-    if ((input = scanf(" %d", &chosen)) == EOF) {
-        return EOF;
-    }
+        if ((input = scanf(" %d", &chosen)) == EOF) {
+            return EOF;
+        }
 
-    if (chosen == menuNumber || retry <= 0) {
-        retry = 5;
-        scanf("%*[^\n]");
-        // scanf("%*c");
-        return GO_HOME;
-    }
+        if (chosen == menuNumber || retry <= 0) {
+            retry = 5;
+            scanf("%*[^\n]");
+            // scanf("%*c");
+            return GO_HOME;
+        }
 
-    if (input == 0 || chosen < VALID || chosen > playlistCount) {
-        retry--;
-        scanf("%*[^\n]");
-        scanf("%*c");
-        printf("Invalid option\n");
-        return playlistID(playlistCollected, playlistCount);
-    }
-    
-    if (chosen >= 1 && chosen <= playlistCount) {
-        retry = 5;
-        return (--chosen);
-    }
+        if (input == 0 || chosen < VALID || chosen > playlistCount) {
+            retry--;
+            scanf("%*[^\n]");
+            scanf("%*c");
+            printf("Invalid option\n");
+            continue;
+        }
+        
+        if (chosen >= 1 && chosen <= playlistCount) {
+            retry = 5;
+            return (--chosen);
+        }
+    } while (1);
     return EOF;
 }
 
