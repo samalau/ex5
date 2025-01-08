@@ -546,7 +546,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
             return (--chosen);
         }
     } while (chosen < VALID || chosen > playlistCount);
-    return chosen;
+    return chosen - 1;
 }
 
 
@@ -617,55 +617,47 @@ void addSong(Song ***songCollected, int *songCount)
     }
 
     // get song title
-    newSong->title = readStringInput("Title:\n");
-    if (newSong->title == NULL) {
-        free(newSong);
-        newSong = NULL;
-        printf("Invalid option\n");
-        return;
-    }
+    do {
+        newSong->title = readStringInput("Title:\n");
+        if (newSong->title == NULL) {
+            printf("Invalid option\n");
+        }
+    } while (newSong->title == NULL);
 
     // get artist name
-    newSong->artist = readStringInput("Artist:\n");
-    if (newSong->artist == NULL) {
-        free(newSong->title);
-        newSong->title = NULL;
-        free(newSong);
-        newSong = NULL;
-        printf("Invalid option\n");
-        return;
-    }
+    do {
+        newSong->artist = readStringInput("Artist:\n");
+        if (newSong->artist == NULL) {
+            printf("Invalid option\n");
+        }
+    } while (newSong->artist == NULL);
 
     // get year of release
-    newSong->year = readIntegerInput("Year of release:\n");
+    do {
+        newSong->year = readIntegerInput("Year of release:\n");
+        if (newSong->year == INVALID) {
+            printf("Invalid option\n");
+        }
+    } while (newSong->year == INVALID);
 
     // get lyrics
-    newSong->lyrics = readStringInput("Lyrics:\n");
-    if (newSong->lyrics == NULL) {
-        free(newSong->title);
-        newSong->title = NULL;
-        free(newSong->artist);
-        newSong->artist = NULL;
-        free(newSong);
-        newSong = NULL;
-        printf("Invalid option\n");
-        return;
-    }
+    do {
+        newSong->lyrics = readStringInput("Lyrics:\n");
+        if (newSong->lyrics == NULL) {
+            printf("Invalid option\n");
+        }
+    } while (newSong->lyrics == NULL);
 
     // initialize stream count
     newSong->streams = 0;
 
-    // Attempt to expand the song list
+    // expand
     Song **temp = realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
     if (temp == NULL) {
         free(newSong->title);
-        newSong->title = NULL;
         free(newSong->artist);
-        newSong->artist = NULL;
         free(newSong->lyrics);
-        newSong->lyrics = NULL;
         free(newSong);
-        newSong = NULL;
         printf("Invalid option\n");
         return;
     }
@@ -674,6 +666,75 @@ void addSong(Song ***songCollected, int *songCount)
     (*songCollected)[*songCount] = newSong;
     (*songCount)++;
 }
+
+// void addSong(Song ***songCollected, int *songCount)
+// {
+//     printf("Enter song's details:\n");
+
+//     Song *newSong = malloc(sizeof(Song));
+//     if (newSong == NULL) {
+//         printf("Invalid option\n");
+//         return;
+//     }
+
+//     // get song title
+//     newSong->title = readStringInput("Title:\n");
+//     if (newSong->title == NULL) {
+//         free(newSong);
+//         newSong = NULL;
+//         printf("Invalid option\n");
+//         return;
+//     }
+
+//     // get artist name
+//     newSong->artist = readStringInput("Artist:\n");
+//     if (newSong->artist == NULL) {
+//         free(newSong->title);
+//         newSong->title = NULL;
+//         free(newSong);
+//         newSong = NULL;
+//         printf("Invalid option\n");
+//         return;
+//     }
+
+//     // get year of release
+//     newSong->year = readIntegerInput("Year of release:\n");
+
+//     // get lyrics
+//     newSong->lyrics = readStringInput("Lyrics:\n");
+//     if (newSong->lyrics == NULL) {
+//         free(newSong->title);
+//         newSong->title = NULL;
+//         free(newSong->artist);
+//         newSong->artist = NULL;
+//         free(newSong);
+//         newSong = NULL;
+//         printf("Invalid option\n");
+//         return;
+//     }
+
+//     // initialize stream count
+//     newSong->streams = 0;
+
+//     // Attempt to expand the song list
+//     Song **temp = realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
+//     if (temp == NULL) {
+//         free(newSong->title);
+//         newSong->title = NULL;
+//         free(newSong->artist);
+//         newSong->artist = NULL;
+//         free(newSong->lyrics);
+//         newSong->lyrics = NULL;
+//         free(newSong);
+//         newSong = NULL;
+//         printf("Invalid option\n");
+//         return;
+//     }
+
+//     *songCollected = temp;
+//     (*songCollected)[*songCount] = newSong;
+//     (*songCount)++;
+// }
 
 
 void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
@@ -754,6 +815,9 @@ int playlistGoTo(Playlist *playlist)
             );
         }
         option = scanf(" %d", &chosen);
+        if (option == EOF) {
+            return EOF;
+        }
         if (chosen == BACK) {
             return BACK;
         }
@@ -824,7 +888,7 @@ int playlistGoTo(Playlist *playlist)
             }
         }
     printMenu = 1;
-    } while (1);
+    } while (chosen != BACK);
     return BACK;
 }
 
@@ -890,6 +954,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 return KILL;
             }
             default: {
+                scanf("%*[^\n]");
+                scanf("%*c");
                 printf("Invalid option\n");
                 break;
             }
@@ -898,8 +964,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
             return KILL;
         }
         printMenu = 1;
-    } while (chosen != BACK);
-    return BACK;
+    } while (chosen != KILL);
+    return KILL;
 }
 
 
