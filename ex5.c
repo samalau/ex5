@@ -517,11 +517,9 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         printf("Choose a playlist:\n");
 
         if (playlistCount > 0) {
-            int i = 0;
-            for (i = 0; i < playlistCount; i++) {
-                printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
+            for (menuNumber = 1; menuNumber <= playlistCount; menuNumber++) {
+                printf("%d. %s\n", (menuNumber), playlistCollected[menuNumber - 1]->name);
             }
-            menuNumber = (i <= 1) ? 1 : i + 1;
         }
 
         printf("%d. Back to main menu\n", menuNumber);
