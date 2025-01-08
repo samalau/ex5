@@ -600,6 +600,8 @@ int songSelect(char action[], int songCount)
         }
 
         if (chosen == QUIT || songCount <= 0) {
+            // scanf("%*[\n]");
+            scanf("%*c");
             return (QUIT - 2);
         }
 
@@ -965,7 +967,7 @@ int playlistGoTo(Playlist *playlist)
             printf("Invalid option\n");
             continue;
         } else {
-             scanf("%*c");
+            scanf("%*c");
             printMenu = 0;
         }
 
