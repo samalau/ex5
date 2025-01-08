@@ -472,6 +472,7 @@ int songSelect(char action[], int songCount)
     int
         chosen = QUIT,
         input = INVALID;
+    static int retry = 5;
 
     printf("choose a song to %s, or 0 to quit:\n", action);
 
@@ -479,11 +480,13 @@ int songSelect(char action[], int songCount)
         return EOF;
     }
 
-    if (chosen == QUIT || songCount <= 0) {
+    if (chosen == QUIT || songCount <= 0 || retry <= 0) {
+        retry = 5;
         return (QUIT - 2);
     }
 
     if (input == 0 || chosen < QUIT || chosen > songCount) {
+        retry--;
         scanf("%*[^\n]");
         scanf("%*c");
         printf("Invalid option\n");
@@ -491,6 +494,7 @@ int songSelect(char action[], int songCount)
     }
 
     if (chosen > QUIT && chosen <= songCount) {
+        retry = 5;
         return (--chosen);
     }
     return EOF;
@@ -503,6 +507,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         menuNumber = 1,
         input = 0,
         chosen = INVALID;
+    static int retry = 5;
     
     printf("Choose a playlist:\n");
 
@@ -520,13 +525,15 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         return EOF;
     }
 
-    if (chosen == menuNumber) {
+    if (chosen == menuNumber || retry <= 0) {
+        retry = 5;
         scanf("%*[^\n]");
         // scanf("%*c");
         return GO_HOME;
     }
 
     if (input == 0 || chosen < VALID || chosen > playlistCount) {
+        retry--;
         scanf("%*[^\n]");
         scanf("%*c");
         printf("Invalid option\n");
@@ -534,6 +541,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
     }
     
     if (chosen >= 1 && chosen <= playlistCount) {
+        retry = 5;
         return (--chosen);
     }
     return EOF;
@@ -543,7 +551,6 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
 void delSong(Song ***songCollected, int *songCount, int songIndex)
 {
     freeSong(&((*songCollected)[songIndex]));
-    // (*songCollected)[songIndex] = NULL;
 
     for (int i = songIndex; i < *songCount - 1; i++) {
         (*songCollected)[i] = (*songCollected)[i + 1];
