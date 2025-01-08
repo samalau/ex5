@@ -965,6 +965,7 @@ int playlistGoTo(Playlist *playlist)
             printf("Invalid option\n");
             continue;
         } else {
+             scanf("%*c");
             printMenu = 0;
         }
 
@@ -1062,6 +1063,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
             printf("Invalid option\n");
             continue;
         } else {
+            scanf("%*c");
             printMenu = 0;
         }
 
