@@ -580,7 +580,7 @@ void songID(Song **songCollected, int songCount)
         currentIndex = (menuNumber - 1);
         printf("%d. Title: %s\n", menuNumber, songCollected[currentIndex]->title);
         printf("   Artist: %s\n", songCollected[currentIndex]->artist);
-        printf("   Year: %d\n", songCollected[currentIndex]->year);
+        printf("   Released: %d\n", songCollected[currentIndex]->year);
         printf("   Streams: %d\n", songCollected[currentIndex]->streams);
     }
 }
