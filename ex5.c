@@ -935,8 +935,11 @@ int home(Playlist ***playlistCollected, int *playlistCount)
         switch (chosen) {
             case VIEW: {
                 while ((identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
-                    if ((state = playlistGoTo((*playlistCollected)[identity])) == EOF || state == BACK) {
-                        break;
+                    if ((state = playlistGoTo((*playlistCollected)[identity])) == EOF) {
+                        return KILL;
+                    }
+                    if (state == BACK) {
+                        continue;
                     }
                 }
                 break;
