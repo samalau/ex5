@@ -389,11 +389,9 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
         insertionSort(songs, n, comparator);
     } else {
         Song **sorted = mergeSort(songs, n, comparator);
-        if (sorted != NULL) {
-            memcpy(songs, sorted, n * sizeof(Song *));
-            free(sorted);
-            sorted = NULL;
-        }
+        memcpy(songs, sorted, n * sizeof(Song *));
+        free(sorted);
+        sorted = NULL;
     }
 }
 
