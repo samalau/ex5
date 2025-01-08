@@ -170,11 +170,14 @@ char *getlineCustom(char **buffer, size_t *size) {
 
     size_t len = 0;
     int inputRead = 0;
-    char formatStr[] = " %[^\n]";
+    // char formatStr[] = " %[^\n]";
+
+    size_t formatSize = sizeof(" %zu[^\n]") + (sizeof(size_t) * 8); 
+    char format[formatSize];
 
     do {
-        // check if buffer needs expansion
-        if ((len + 2) >= *size) {
+        // expand buffer
+        if (len + MAX_SCANF_INPUT >= *size - 1) {
             *size *= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
@@ -185,24 +188,44 @@ char *getlineCustom(char **buffer, size_t *size) {
             }
             *buffer = temp;
         }
+        // if ((len + 2) >= *size) {
+        //     *size *= EXPANSION_FACTOR;
+        //     char *temp = realloc(*buffer, *size);
+        //     if (temp == NULL) {
+        //         free(*buffer);
+        //         *buffer = NULL;
+        //         printf("Invalid option\n");
+        //         return NULL;
+        //     }
+        //     *buffer = temp;
+        // }
 
-        // read input dynamically without length restriction
-        inputRead = scanf(formatStr, (*buffer + len));
+        size_t remainingSpace = *size - len - 1;
+        sprintf(format, " %%%zu[^\n]", remainingSpace);
+
+        inputRead = scanf(format, *buffer + len);
+        // inputRead = scanf(formatStr, (*buffer + len));
 
         if (inputRead == 1) {
             len += strlen(*buffer + len);
         }
 
         // reset buffer content if invalid input or empty buffer
-        if (inputRead != 1 || (inputRead == 1 && (*buffer)[0] == '\0')) {
+        if (inputRead != 1 || (*buffer)[0] == '\0') {
             free(*buffer);
             *buffer = NULL;
             printf("Invalid option\n");
             return NULL;
         }
+        // if (inputRead != 1 || (inputRead == 1 && (*buffer)[0] == '\0')) {
+        //     free(*buffer);
+        //     *buffer = NULL;
+        //     printf("Invalid option\n");
+        //     return NULL;
+        // }
 
-        // shrink buffer if usage drops below the threshold
-        if (len > 0 && ((len + 2) < ((*size) / SHRINK_THRESHOLD_FACTOR)) && *size > INITIAL_BUFFER_SIZE) {
+        // shrink buffer
+        if (len + 2 < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
             *size /= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
@@ -213,7 +236,20 @@ char *getlineCustom(char **buffer, size_t *size) {
             }
             *buffer = temp;
         }
-    } while (inputRead != 1 || len == 0);
+        // if (len > 0 && ((len + 2) < ((*size) / SHRINK_THRESHOLD_FACTOR)) && *size > INITIAL_BUFFER_SIZE) {
+        //     *size /= EXPANSION_FACTOR;
+        //     char *temp = realloc(*buffer, *size);
+        //     if (temp == NULL) {
+        //         free(*buffer);
+        //         *buffer = NULL;
+        //         printf("Invalid option\n");
+        //         return NULL;
+        //     }
+        //     *buffer = temp;
+        // }
+    // } while (inputRead != 1 || len == 0);
+    } while (len == *size - 1);
+    (*buffer)[len] = '\0'; 
     return *buffer;
 }
 
@@ -225,7 +261,6 @@ char *strdupCustom(const char *s)
     }
     size_t len = strlen(s) + 1;
     char *copy = calloc(len, sizeof(char));
-    // char *copy = malloc(len);
     if (copy == NULL) {
         printf("Invalid option\n");
         return NULL;
