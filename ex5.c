@@ -546,8 +546,12 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         if (chosen >= 1 && chosen <= playlistCount) {
             return (--chosen);
         }
-    } while (chosen < VALID || chosen > playlistCount);
-    return chosen - 1;
+    } while (
+        chosen < VALID
+        || (playlistCount > 0 && chosen > playlistCount + 1)
+        || (playlistCount <= 0 && chosen != VALID)
+    );
+    return --chosen;
 }
 
 
@@ -816,9 +820,11 @@ int playlistGoTo(Playlist *playlist)
             );
         }
         option = scanf(" %d", &chosen);
-        if (option == EOF) {
-            return EOF;
-        }
+
+        // if (option == EOF) {
+        //     return EOF;
+        // }
+
         if (chosen == BACK) {
             return BACK;
         }
@@ -835,18 +841,32 @@ int playlistGoTo(Playlist *playlist)
 
         switch (chosen) {
             case VIEW: {
+
+                /////////////
                 if (playlistCurrent->songs != NULL && playlistCurrent->songsNum > 0) {
                     songID(playlistCurrent->songs, playlistCurrent->songsNum);
                 }
-                do {
-                    if ((identity = songSelect("play", playlistCurrent->songsNum)) == EOF) {
-                        return EOF;
-                    }
-                    if (identity > EOF) {
-                        playSong(identity, playlistCurrent->songs);
-                    }
-                } while (identity > EOF);
+                while ((identity = songSelect("play", playlistCurrent->songsNum)) > INVALID) {
+                    playSong(identity, playlistCurrent->songs);
+                }
+                if (identity == EOF) {
+                    return KILL;
+                }
                 break;
+                /////////////
+
+                // if (playlistCurrent->songs != NULL && playlistCurrent->songsNum > 0) {
+                //     songID(playlistCurrent->songs, playlistCurrent->songsNum);
+                // }
+                // do {
+                //     if ((identity = songSelect("play", playlistCurrent->songsNum)) == EOF) {
+                //         return EOF;
+                //     }
+                //     if (identity > EOF) {
+                //         playSong(identity, playlistCurrent->songs);
+                //     }
+                // } while (identity > EOF);
+                // break;
             }
             case ADD: {
                 addSong(&playlistCurrent->songs, &playlistCurrent->songsNum);
