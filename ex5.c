@@ -316,18 +316,36 @@ char* readStringInput(const char* prompt) {
 
 int readIntegerInput(const char* prompt)
 {
-    int
-        value = INVALID;
+    int value = INVALID;
     char confirm = '\0';
+
     do {
         printf("%s", prompt);
-        if (scanf(" %d%c", &value, &confirm) == 2 && confirm == '\n') {
-            break;
+        if (scanf(" %d%c", &value, &confirm) != 2 || confirm != '\n') {
+            printf("Invalid option\n");
+            scanf("%*[^\n]");
+            scanf("%*c");
+            value = INVALID;
         }
-        printf("Invalid option\n");
-    } while (1);
+    } while (value == INVALID);
+
     return value;
 }
+
+// int readIntegerInput(const char* prompt)
+// {
+//     int
+//         value = INVALID;
+//     char confirm = '\0';
+//     do {
+//         printf("%s", prompt);
+//         if (scanf(" %d%c", &value, &confirm) == 2 && confirm == '\n') {
+//             break;
+//         }
+//         printf("Invalid option\n");
+//     } while (1);
+//     return value;
+// }
 
 
 int compareByYear(const void *a, const void *b)
