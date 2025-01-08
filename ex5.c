@@ -472,8 +472,6 @@ void songID(Song **songCollected, int songCount)
 
 int songSelect(char action[], int songCount)
 {
-    static int retry = 5;
-
     int
         chosen = QUIT,
         input = INVALID;
@@ -485,32 +483,27 @@ int songSelect(char action[], int songCount)
             return EOF;
         }
 
-        if (chosen == QUIT || songCount <= 0 || retry <= 0) {
-            retry = 5;
+        if (chosen == QUIT || songCount <= 0) {
             return (QUIT - 2);
         }
 
         if (input == 0 || chosen < QUIT || chosen > songCount) {
-            retry--;
             scanf("%*[^\n]");
             scanf("%*c");
             printf("Invalid option\n");
-            return songSelect(action, songCount);
+            continue;
         }
 
         if (chosen > QUIT && chosen <= songCount) {
-            retry = 5;
             return (--chosen);
         }
-    } while (1);
-    return EOF;
+    } while (chosen < VALID || chosen > songCount);
+    return chosen;
 }
 
 
 int playlistID(Playlist **playlistCollected, int playlistCount)
 {
-    static int retry = 5;
-
     int
         menuNumber = 1,
         input = 0,
@@ -537,15 +530,13 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
             return EOF;
         }
 
-        if (chosen == menuNumber || retry <= 0) {
-            retry = 5;
+        if (chosen == menuNumber) {
             scanf("%*[^\n]");
-            // scanf("%*c");
+            scanf("%*c");
             return GO_HOME;
         }
 
         if (input == 0 || chosen < VALID || chosen > playlistCount) {
-            retry--;
             scanf("%*[^\n]");
             scanf("%*c");
             printf("Invalid option\n");
@@ -553,11 +544,10 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         }
         
         if (chosen >= 1 && chosen <= playlistCount) {
-            retry = 5;
             return (--chosen);
         }
-    } while (1);
-    return EOF;
+    } while (chosen < VALID || chosen > playlistCount);
+    return chosen;
 }
 
 
