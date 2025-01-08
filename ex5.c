@@ -157,9 +157,21 @@ char *getlineCustom(char **buffer, size_t *size) {
     }
 
     size_t len = 0;
+    int inputRead;
+
     while (1) {
+        inputRead = scanf("%1[^\n]", *buffer + len);
+        if (inputRead != 1) { 
+            scanf("%*c");
+            (*buffer)[len] = '\0';  
+            break;
+        }
+
+        len++;
+
+        // expand buffer dynamically if full
         if (len == *size - 1) {
-            *size *= 2;
+            *size *= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (!temp) {
                 free(*buffer);
@@ -169,13 +181,6 @@ char *getlineCustom(char **buffer, size_t *size) {
             }
             *buffer = temp;
         }
-
-        int c = scanf("%*c");
-        if (c == '\n' || c == EOF) {
-            (*buffer)[len] = '\0';
-            break;
-        }
-        (*buffer)[len++] = (char)c;
     }
 
     return *buffer;
