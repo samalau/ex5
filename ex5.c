@@ -120,9 +120,10 @@ void freeSong(Song **song)
         free((*song)->lyrics);
         (*song)->lyrics = NULL;
     }
-
-    free((*song));
-    (*song) = NULL;
+    if ((*song) != NULL) {
+        free((*song));
+        (*song) = NULL;
+    }
 }
 
 
@@ -148,9 +149,10 @@ void freePlaylist(Playlist **p)
         free((*p)->name);
         (*p)->name = NULL;
     }
-
-    free((*p));
-    (*p) = NULL;
+    if ((*p)->name != NULL) {
+        free((*p));
+        (*p) = NULL;
+    }
 }
 
 
@@ -172,26 +174,33 @@ char *getlineCustom(char **buffer, size_t *size) {
 
     do {
         // expand buffer if needed
-        if (len + 2 >= *size) {
-            *size *= EXPANSION_FACTOR;
+        // if (len + 2 >= *size) {
+            if (*size <= 0) {
+                *size = INITIAL_BUFFER_SIZE;
+            }
+            // *size *= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
-                free(*buffer);
-                *buffer = NULL;
+                if (*buffer != NULL) {
+                    free(*buffer);
+                    *buffer = NULL;
+                }
                 printf("Invalid option\n");
                 return NULL;
             }
             *buffer = temp;
-        }
+        // }
 
-        inputRead = scanf(" %[^\n]", *buffer + len);
+        inputRead = scanf("%2047[^\n]", *buffer + len);
         scanf("%*c");
 
         // reset buffer content if invalid input or empty buffer
         // || (*buffer)[0] == '\0'
         if (inputRead != 1) {
-            free(*buffer);
-            *buffer = NULL;
+            if (*buffer != NULL) {
+                free(*buffer);
+                *buffer = NULL;
+            }
             printf("Invalid option\n");
             return NULL;
         }
@@ -366,28 +375,37 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
     Song **right = mergeSort((songs + mid), (n - mid), comparator);
 
     if (left == NULL || right == NULL) {
-        free(left);
-        left = NULL;
-        free(right);
-        right = NULL;
+        if (left != NULL) {
+            free(left);
+            left = NULL;
+        }
+        if (right != NULL) {
+            free(right);
+            right = NULL;
+        }
         printf("Invalid option\n");
         return NULL;
     }
 
     Song **sorted = merge(left, mid, right, n - mid, comparator);
     if (sorted == NULL) {
-        free(left);
-        left = NULL;
-        free(right);
-        right = NULL;
+        if (left != NULL) {
+            free(left);
+            left = NULL;
+        }
+        if (right != NULL) {
+            free(right);
+            right = NULL;
+        }
         printf("Invalid option\n");
         return NULL;
     }
 
     memcpy(songs, sorted, n * sizeof(Song *));
-    free(sorted);
-    sorted = NULL;
-
+    if (sorted != NULL) {
+        free(sorted);
+        sorted = NULL;
+    }
     return songs;
 }
 
@@ -399,8 +417,10 @@ void hybridSort(Song **songs, int n, int (*comparator)(const void *, const void 
     } else {
         Song **sorted = mergeSort(songs, n, comparator);
         memcpy(songs, sorted, n * sizeof(Song *));
-        free(sorted);
-        sorted = NULL;
+        if (sorted != NULL) {
+            free(sorted);
+            sorted = NULL;
+        }
     }
 }
 
@@ -540,7 +560,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
             return GO_HOME;
         }
 
-        if (input == 0 || chosen < VALID || chosen > playlistCount) {
+        if (input != 1 || chosen < VALID || chosen > playlistCount) {
             scanf("%*[^\n]");
             scanf("%*c");
             printf("Invalid option\n");
@@ -655,18 +675,25 @@ void addSong(Song ***songCollected, int *songCount)
     // expand
     Song **temp = realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
     if (temp == NULL) {
-        free(newSong->title);
-        newSong->title = NULL;
-        free(newSong->artist);
-        newSong->artist = NULL;
-        free(newSong->lyrics);
-        newSong->lyrics = NULL;
-        free(newSong);
-        newSong = NULL;
+        if ((newSong->title) != NULL) {
+           free(newSong->title);
+            newSong->title = NULL; 
+        }
+        if ((newSong->artist) != NULL) {
+            free(newSong->artist);
+            newSong->artist = NULL;
+        }
+        if ((newSong->lyrics) != NULL) {
+            free(newSong->lyrics);
+            newSong->lyrics = NULL;
+        }
+        if ((newSong) != NULL) {
+            free(newSong);
+            newSong = NULL;
+        }
         printf("Invalid option\n");
         return;
     }
-
     *songCollected = temp;
     (*songCollected)[*songCount] = newSong;
     (*songCount)++;
@@ -748,16 +775,20 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     size_t size = 0;
 
     if (getlineCustom(&playlistName, &size) == NULL || strlen(playlistName) == 0) {
-        free(playlistName);
-        playlistName = NULL;
+        if (playlistName != NULL) {
+            free(playlistName);
+            playlistName = NULL;
+        }
         printf("Invalid option\n");
         return;
     }
 
     Playlist *newPlaylist = malloc(sizeof(Playlist));
     if (newPlaylist == NULL) {
-        free(playlistName);
-        playlistName = NULL;
+        if (playlistName != NULL) {
+            free(playlistName);
+            playlistName = NULL;
+        }
         printf("Invalid option\n");
         return;
     }
@@ -765,10 +796,14 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
     newPlaylist->name = strdupCustom(playlistName);
 
     if (newPlaylist->name == NULL) {
-        free(playlistName);
-        playlistName = NULL;
-        free(newPlaylist);
-        newPlaylist = NULL;
+        if (playlistName != NULL) {
+            free(playlistName);
+            playlistName = NULL;
+        }
+        if (newPlaylist != NULL) {
+            free(newPlaylist);
+            newPlaylist = NULL;
+        }
         printf("Invalid option\n");
         return;
     }
@@ -783,10 +818,14 @@ void addPlaylist(Playlist ***playlistCollected, int *playlistCount) {
 
     Playlist **temp = realloc(*playlistCollected, (*playlistCount + 1) * sizeof(Playlist *));
     if (temp == NULL) {
-        free(newPlaylist->name);
-        newPlaylist->name = NULL;
-        free(newPlaylist);
-        newPlaylist = NULL;
+        if ((newPlaylist->name) != NULL) {
+            free(newPlaylist->name);
+            newPlaylist->name = NULL;
+        }
+        if ((newPlaylist) != NULL) {
+            free(newPlaylist);
+            newPlaylist = NULL;
+        }
         printf("Invalid option\n");
         return;
     }
@@ -821,9 +860,9 @@ int playlistGoTo(Playlist *playlist)
         }
         option = scanf(" %d", &chosen);
 
-        // if (option == EOF) {
-        //     return EOF;
-        // }
+        if (option == EOF) {
+            return EOF;
+        }
 
         if (chosen == BACK) {
             return BACK;
@@ -989,9 +1028,11 @@ int main()
         freePlaylist(&playlistCollected[i]);
     }
 
-    free(playlistCollected);
-    playlistCollected = NULL;
-
+    if ((playlistCollected) != NULL) {
+        free(playlistCollected);
+        playlistCollected = NULL;
+    }
+    
     printf("Goodbye!\n");
     return 0;
 }
