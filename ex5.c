@@ -172,8 +172,6 @@ char *getlineCustom(char **buffer, size_t *size) {
     size_t len = 0;
     int inputRead = 0;
 
-    // char format[sizeof(" %zu[^\n]") + 10];
-
     do {
         // expand buffer if needed
         if (len + 2 >= *size) {
@@ -188,11 +186,8 @@ char *getlineCustom(char **buffer, size_t *size) {
             *buffer = temp;
         }
 
-        // snprintf(format, sizeof(format), " %%%zu[^\n]", *size - len - 1);
-
-        // inputRead = scanf(format, *buffer + len);
         inputRead = scanf(" %[^\n]", *buffer + len);
-        scanf("%*c");
+        // scanf("%*c");
 
         if (inputRead == 1) {
             len += strlen(*buffer + len);
@@ -841,8 +836,6 @@ int playlistGoTo(Playlist *playlist)
 
         switch (chosen) {
             case VIEW: {
-
-                /////////////
                 if (playlistCurrent->songs != NULL && playlistCurrent->songsNum > 0) {
                     songID(playlistCurrent->songs, playlistCurrent->songsNum);
                 }
@@ -853,20 +846,6 @@ int playlistGoTo(Playlist *playlist)
                     return KILL;
                 }
                 break;
-                /////////////
-
-                // if (playlistCurrent->songs != NULL && playlistCurrent->songsNum > 0) {
-                //     songID(playlistCurrent->songs, playlistCurrent->songsNum);
-                // }
-                // do {
-                //     if ((identity = songSelect("play", playlistCurrent->songsNum)) == EOF) {
-                //         return EOF;
-                //     }
-                //     if (identity > EOF) {
-                //         playSong(identity, playlistCurrent->songs);
-                //     }
-                // } while (identity > EOF);
-                // break;
             }
             case ADD: {
                 addSong(&playlistCurrent->songs, &playlistCurrent->songsNum);
@@ -902,8 +881,8 @@ int playlistGoTo(Playlist *playlist)
                 return BACK;
             }
             default: {
-                scanf("%*[^\n]");
-                scanf("%*c");
+                // scanf("%*[^\n]");
+                // scanf("%*c");
                 printf("Invalid option\n");
                 break;
             }
@@ -972,6 +951,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 if ((identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
                     delPlaylist(playlistCollected, playlistCount, identity);
                 }
+                printf("Playlist deleted.\n");
             break;
             }
             case KILL: {
