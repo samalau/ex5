@@ -831,10 +831,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 break;
             }
             case DELETE: {
-                if (*playlistCollected != NULL
-                    && *playlistCount > 0
-                    && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID
-                ) {
+                if ((identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
                     delPlaylist(playlistCollected, playlistCount, identity);
                 }
             break;
