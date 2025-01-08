@@ -264,8 +264,6 @@ int readIntegerInput(const char* prompt)
             break;
         }
         printf("Invalid option\n");
-        scanf("%*[^\n]");
-        scanf("%*c");
     } while (1);
     return value;
 }
