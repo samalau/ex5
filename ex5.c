@@ -516,7 +516,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         return playlistID(playlistCollected, playlistCount);
     }
     
-    if (chosen > 1 && chosen <= playlistCount) {
+    if (chosen >= 1 && chosen <= playlistCount) {
         return (--chosen);
     }
     return EOF;
