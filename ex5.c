@@ -494,7 +494,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         for (i = 0; i < playlistCount; i++) {
             printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
         }
-        menuNumber = (i < 1) ? 1 : i;
+        menuNumber = (i < 1) ? 1 : i + 1;
     }
 
     printf("%d. Back to main menu\n", menuNumber);
@@ -503,7 +503,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         return EOF;
     }
 
-    if (chosen == 1) {
+    if (chosen == menuNumber) {
         scanf("%*[^\n]");
         // scanf("%*c");
         return GO_HOME;
