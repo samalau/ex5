@@ -5,6 +5,7 @@ Assignment: ex5
 *******************/
 
 // TODO: EOF
+// TODO: duplicate names
 // TODO: comments
 // TODO: enumerate macros
 
@@ -161,7 +162,7 @@ char *getlineCustom(char **buffer, size_t *size) {
     }
     if (*buffer == NULL) {
         *size = INITIAL_BUFFER_SIZE;
-        *buffer = calloc(*size, sizeof(char));
+        *buffer = malloc(*size);
         if (*buffer == NULL) {
             printf("Invalid option\n");
             return NULL;
@@ -170,14 +171,13 @@ char *getlineCustom(char **buffer, size_t *size) {
 
     size_t len = 0;
     int inputRead = 0;
-    // char formatStr[] = " %[^\n]";
 
     size_t formatSize = sizeof(" %zu[^\n]") + (sizeof(size_t) * 8); 
     char format[formatSize];
 
     do {
         // expand buffer
-        if (len + MAX_SCANF_INPUT >= *size - 1) {
+        if (len + 2 >= *size) {
             *size *= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
@@ -188,23 +188,10 @@ char *getlineCustom(char **buffer, size_t *size) {
             }
             *buffer = temp;
         }
-        // if ((len + 2) >= *size) {
-        //     *size *= EXPANSION_FACTOR;
-        //     char *temp = realloc(*buffer, *size);
-        //     if (temp == NULL) {
-        //         free(*buffer);
-        //         *buffer = NULL;
-        //         printf("Invalid option\n");
-        //         return NULL;
-        //     }
-        //     *buffer = temp;
-        // }
 
-        size_t remainingSpace = *size - len - 1;
-        sprintf(format, " %%%zu[^\n]", remainingSpace);
+        snprintf(format, sizeof(format), " %%%zu[^\n]", *size - len - 1);
 
         inputRead = scanf(format, *buffer + len);
-        // inputRead = scanf(formatStr, (*buffer + len));
 
         if (inputRead == 1) {
             len += strlen(*buffer + len);
@@ -217,12 +204,6 @@ char *getlineCustom(char **buffer, size_t *size) {
             printf("Invalid option\n");
             return NULL;
         }
-        // if (inputRead != 1 || (inputRead == 1 && (*buffer)[0] == '\0')) {
-        //     free(*buffer);
-        //     *buffer = NULL;
-        //     printf("Invalid option\n");
-        //     return NULL;
-        // }
 
         // shrink buffer
         if (len + 2 < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
@@ -236,18 +217,6 @@ char *getlineCustom(char **buffer, size_t *size) {
             }
             *buffer = temp;
         }
-        // if (len > 0 && ((len + 2) < ((*size) / SHRINK_THRESHOLD_FACTOR)) && *size > INITIAL_BUFFER_SIZE) {
-        //     *size /= EXPANSION_FACTOR;
-        //     char *temp = realloc(*buffer, *size);
-        //     if (temp == NULL) {
-        //         free(*buffer);
-        //         *buffer = NULL;
-        //         printf("Invalid option\n");
-        //         return NULL;
-        //     }
-        //     *buffer = temp;
-        // }
-    // } while (inputRead != 1 || len == 0);
     } while (len == *size - 1);
     (*buffer)[len] = '\0'; 
     return *buffer;
@@ -551,7 +520,7 @@ int playlistID(Playlist **playlistCollected, int playlistCount)
         for (i = 0; i < playlistCount; i++) {
             printf("%d. %s\n", (i + 1), playlistCollected[i]->name);
         }
-        menuNumber = (i < 1) ? 1 : i + 1;
+        menuNumber = (i <= 1) ? 1 : i + 1;
     }
 
     printf("%d. Back to main menu\n", menuNumber);
