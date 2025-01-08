@@ -195,23 +195,24 @@ char *getlineCustom(char **buffer, size_t *size) {
             printf("Invalid option\n");
             return NULL;
         }
-        // return *buffer;
+        return *buffer;
 
-        if (inputRead == 1) {
-            len += strlen(*buffer + len);
-        }
+        // if (inputRead == 1) {
+        //     len += strlen(*buffer + len);
+        // }
 
-        // shrink buffer if needed
-        if (len < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
-            size_t newSize = len + 1;
-            char *temp = realloc(*buffer, newSize);
-            if (temp == NULL) {
-                printf("Invalid option\n");
-            } else {
-                *buffer = temp;
-                *size = newSize;
-            }
-        }
+        // // shrink buffer if needed
+        // if (len < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
+        //     size_t newSize = len + 1;
+        //     char *temp = realloc(*buffer, newSize);
+        //     if (temp == NULL) {
+        //         printf("Invalid option\n");
+        //     } else {
+        //         *buffer = temp;
+        //         *size = newSize;
+        //     }
+        // }
+        /////
         // if (len + 2 < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
         //     *size /= EXPANSION_FACTOR;
         //     char *temp = realloc(*buffer, *size);
@@ -847,7 +848,7 @@ int playlistGoTo(Playlist *playlist)
                     playSong(identity, playlistCurrent->songs);
                 }
                 if (identity == EOF) {
-                    return KILL;
+                    return EOF;
                 }
                 break;
             }
@@ -942,9 +943,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                         return KILL;
                     }
                     if (state == BACK) {
-                        identity = GO_HOME;
-                        chosen = INVALID;
-                        break;
+                        continue;
                     }
                 }
                 break;
