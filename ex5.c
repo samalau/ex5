@@ -172,7 +172,7 @@ char *getlineCustom(char **buffer, size_t *size) {
     size_t len = 0;
     int inputRead = 0;
 
-    char format[sizeof(" %zu[^\n]") + 10];
+    // char format[sizeof(" %zu[^\n]") + 10];
 
     do {
         // expand buffer
@@ -188,9 +188,10 @@ char *getlineCustom(char **buffer, size_t *size) {
             *buffer = temp;
         }
 
-        snprintf(format, sizeof(format), " %%%zu[^\n]", *size - len - 1);
+        // snprintf(format, sizeof(format), " %%%zu[^\n]", *size - len - 1);
 
-        inputRead = scanf(format, *buffer + len);
+        // inputRead = scanf(format, *buffer + len);
+        inputRead = scanf(" %[^\n]", *buffer + len);
 
         if (inputRead == 1) {
             len += strlen(*buffer + len);
@@ -795,6 +796,7 @@ int playlistGoTo(Playlist *playlist)
                 }
                 if (identity > EOF) {
                     delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, identity);
+                    printf("Song deleted successfully.\n");
                 }
                 break;
             }
