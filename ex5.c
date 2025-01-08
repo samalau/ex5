@@ -61,8 +61,8 @@ typedef struct playlistGroup {
     int playlistCount;
 } playlistGroup;
 
-void freeSong(Song *song);
-void freePlaylist(Playlist *p);
+void freeSong(Song **song);
+void freePlaylist(Playlist **p);
 
 char *getlineCustom(char **buffer, size_t *size);
 char *strdupCustom(const char *s);
@@ -139,12 +139,12 @@ void freePlaylist(Playlist **p)
         }
     }
 
-    if (p->songs != NULL) {
+    if ((*p)->songs != NULL) {
         free((*p)->songs);
         (*p)->songs = NULL;
     }
 
-    if (p->name != NULL) {
+    if ((*p)->name != NULL) {
         free((*p)->name);
         (*p)->name = NULL;
     }
@@ -954,7 +954,7 @@ int main()
     for (int i = 0; i < playlistCount; i++) {
         freePlaylist(&playlistCollected[i]);
     }
-    
+
     if (playlistCollected != NULL) {
         free(playlistCollected);
         playlistCollected = NULL;
