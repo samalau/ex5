@@ -204,12 +204,14 @@ char *getlineCustom(char **buffer, size_t *size) {
         }
 
         // shrink buffer if usage drops below the threshold
-        if (len > 0 && len < (*size) / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
+        if (len > 0 && ((len + 2) < ((*size) / SHRINK_THRESHOLD_FACTOR)) && *size > INITIAL_BUFFER_SIZE) {
             *size /= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
-                free(*buffer);
-                *buffer = NULL;
+                if (*buffer != NULL) {
+                    free(*buffer);
+                    *buffer = NULL;
+                }
                 printf("Invalid option\n");
                 return NULL;
             }
@@ -955,10 +957,8 @@ int main()
         freePlaylist(&playlistCollected[i]);
     }
 
-    if (playlistCollected != NULL) {
-        free(playlistCollected);
-        playlistCollected = NULL;
-    }
+    free(playlistCollected);
+    playlistCollected = NULL;
 
     printf("Goodbye!\n");
     return 0;
