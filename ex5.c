@@ -175,7 +175,7 @@ char *getlineCustom(char **buffer, size_t *size) {
     // char format[sizeof(" %zu[^\n]") + 10];
 
     do {
-        // expand buffer
+        // expand buffer if needed
         if (len + 2 >= *size) {
             *size *= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
@@ -192,6 +192,7 @@ char *getlineCustom(char **buffer, size_t *size) {
 
         // inputRead = scanf(format, *buffer + len);
         inputRead = scanf(" %[^\n]", *buffer + len);
+        scanf("%*c");
 
         if (inputRead == 1) {
             len += strlen(*buffer + len);
@@ -205,7 +206,7 @@ char *getlineCustom(char **buffer, size_t *size) {
             return NULL;
         }
 
-        // shrink buffer
+        // shrink buffer if needed
         if (len + 2 < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
             *size /= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
@@ -287,7 +288,7 @@ int compareByStreamAscend(const void *a, const void *b)
 {
     int streamA = (*(Song **)a)->streams;
     int streamB = (*(Song **)b)->streams;
-    return (streamA > streamB) - (streamA < streamB);
+    return (streamA - streamB);
 }
 
 
@@ -295,7 +296,7 @@ int compareByStreamDescend(const void *a, const void *b)
 {
     int streamA = (*(Song **)a)->streams;
     int streamB = (*(Song **)b)->streams;
-    return (streamB > streamA) - (streamB < streamA);
+    return (streamB - streamA);
 }
 
 
@@ -635,7 +636,7 @@ void addSong(Song ***songCollected, int *songCount)
     // get year of release
     do {
         newSong->year = readIntegerInput("Year of release:\n");
-        if (newSong->year == INVALID) {
+        if (newSong->year <= INVALID) {
             printf("Invalid option\n");
         }
     } while (newSong->year == INVALID);
