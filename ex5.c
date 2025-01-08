@@ -4,7 +4,6 @@ ID: 346587629
 Assignment: ex5
 *******************/
 
-// TODO: EOF
 // TODO: duplicate names
 // TODO: comments
 // TODO: enumerate macros
@@ -21,11 +20,11 @@ Assignment: ex5
 #define PLAY 5
 #define BACK 6
 
-#define INITIAL_BUFFER_SIZE 4
+#define INITIAL_BUFFER_SIZE 2048
+// #define INITIAL_BUFFER_SIZE 4
 #define EXPANSION_FACTOR 2
 #define SHRINK_THRESHOLD_FACTOR 2
-#define MAX_SCANF_INPUT (INITIAL_BUFFER_SIZE - 1)
-#define MAX_SCANF_INPUT_STR "4"
+// #define MAX_SCANF_INPUT (INITIAL_BUFFER_SIZE - 1)
 
 #define SORT_BY_YEAR 1
 #define SORT_ASCEND_STREAM 2
@@ -160,13 +159,12 @@ char *getlineCustom(char **buffer, size_t *size) {
         printf("Invalid option\n");
         return NULL;
     }
+    
+    *buffer = malloc(*size);
+        
     if (*buffer == NULL) {
-        *size = INITIAL_BUFFER_SIZE;
-        *buffer = malloc(*size);
-        if (*buffer == NULL) {
-            printf("Invalid option\n");
-            return NULL;
-        }
+        printf("Invalid option\n");
+        return NULL;
     }
 
     size_t len = 0;
@@ -187,32 +185,44 @@ char *getlineCustom(char **buffer, size_t *size) {
         }
 
         inputRead = scanf(" %[^\n]", *buffer + len);
-        // scanf("%*c");
-
-        if (inputRead == 1) {
-            len += strlen(*buffer + len);
-        }
+        scanf("%*c");
 
         // reset buffer content if invalid input or empty buffer
-        if (inputRead != 1 || (*buffer)[0] == '\0') {
+        // || (*buffer)[0] == '\0'
+        if (inputRead != 1) {
             free(*buffer);
             *buffer = NULL;
             printf("Invalid option\n");
             return NULL;
         }
+        // return *buffer;
+
+        if (inputRead == 1) {
+            len += strlen(*buffer + len);
+        }
 
         // shrink buffer if needed
-        if (len + 2 < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
-            *size /= EXPANSION_FACTOR;
-            char *temp = realloc(*buffer, *size);
+        if (len < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
+            size_t newSize = len + 1;
+            char *temp = realloc(*buffer, newSize);
             if (temp == NULL) {
-                free(*buffer);
-                *buffer = NULL;
                 printf("Invalid option\n");
-                return NULL;
+            } else {
+                *buffer = temp;
+                *size = newSize;
             }
-            *buffer = temp;
         }
+        // if (len + 2 < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
+        //     *size /= EXPANSION_FACTOR;
+        //     char *temp = realloc(*buffer, *size);
+        //     if (temp == NULL) {
+        //         free(*buffer);
+        //         *buffer = NULL;
+        //         printf("Invalid option\n");
+        //         return NULL;
+        //     }
+        //     *buffer = temp;
+        // }
     } while (len == *size - 1);
     (*buffer)[len] = '\0'; 
     return *buffer;
@@ -615,35 +625,27 @@ void addSong(Song ***songCollected, int *songCount)
     }
 
     // get song title
+    newSong->title = NULL;
     do {
         newSong->title = readStringInput("Title:\n");
-        if (newSong->title == NULL) {
-            printf("Invalid option\n");
-        }
     } while (newSong->title == NULL);
 
     // get artist name
+    newSong->artist = NULL;
     do {
         newSong->artist = readStringInput("Artist:\n");
-        if (newSong->artist == NULL) {
-            printf("Invalid option\n");
-        }
     } while (newSong->artist == NULL);
 
     // get year of release
+    newSong->year = INVALID;
     do {
         newSong->year = readIntegerInput("Year of release:\n");
-        if (newSong->year <= INVALID) {
-            printf("Invalid option\n");
-        }
-    } while (newSong->year == INVALID);
+    } while (newSong->year <= INVALID);
 
     // get lyrics
+    newSong->lyrics = NULL;
     do {
         newSong->lyrics = readStringInput("Lyrics:\n");
-        if (newSong->lyrics == NULL) {
-            printf("Invalid option\n");
-        }
     } while (newSong->lyrics == NULL);
 
     // initialize stream count
@@ -653,9 +655,13 @@ void addSong(Song ***songCollected, int *songCount)
     Song **temp = realloc(*songCollected, (*songCount + 1) * sizeof(Song *));
     if (temp == NULL) {
         free(newSong->title);
+        newSong->title = NULL;
         free(newSong->artist);
+        newSong->artist = NULL;
         free(newSong->lyrics);
+        newSong->lyrics = NULL;
         free(newSong);
+        newSong = NULL;
         printf("Invalid option\n");
         return;
     }
@@ -936,7 +942,9 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                         return KILL;
                     }
                     if (state == BACK) {
-                        continue;
+                        identity = GO_HOME;
+                        chosen = INVALID;
+                        break;
                     }
                 }
                 break;
