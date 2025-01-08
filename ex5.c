@@ -912,8 +912,8 @@ int playlistGoTo(Playlist *playlist)
                 "%d. Add Song\n"
                 "%d. Delete Song\n"
                 "%d. Sort\n"
-                "%d. Play All\n"
-                "%d. Back\n",
+                "%d. Play\n"
+                "%d. exit\n",
                 VIEW, ADD, DELETE, SORT, PLAY, BACK
             );
         }
