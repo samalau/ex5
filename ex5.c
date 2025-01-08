@@ -172,8 +172,7 @@ char *getlineCustom(char **buffer, size_t *size) {
     size_t len = 0;
     int inputRead = 0;
 
-    size_t formatSize = sizeof(" %zu[^\n]") + (sizeof(size_t) * 8); 
-    char format[formatSize];
+    char format[sizeof(" %zu[^\n]") + 10];
 
     do {
         // expand buffer
