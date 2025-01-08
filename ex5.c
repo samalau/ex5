@@ -367,14 +367,10 @@ Song **mergeSort(Song **songs, int n, int (*comparator)(const void *, const void
 
     Song **sorted = merge(left, mid, right, n - mid, comparator);
     if (sorted == NULL) {
-        if (left != NULL) {
-            free(left);
-            left = NULL;
-        }
-        if (right != NULL) {
-            free(right);
-            right = NULL;
-        }
+        free(left);
+        left = NULL;
+        free(right);
+        right = NULL;
         printf("Invalid option\n");
         return NULL;
     }
