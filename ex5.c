@@ -881,8 +881,8 @@ int playlistGoTo(Playlist *playlist)
                 return BACK;
             }
             default: {
-                // scanf("%*[^\n]");
-                // scanf("%*c");
+                scanf("%*[^\n]");
+                scanf("%*c");
                 printf("Invalid option\n");
                 break;
             }
@@ -950,8 +950,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
             case DELETE: {
                 if ((identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
                     delPlaylist(playlistCollected, playlistCount, identity);
+                    printf("Playlist deleted.\n");
                 }
-                printf("Playlist deleted.\n");
             break;
             }
             case KILL: {
