@@ -157,54 +157,99 @@ void freePlaylist(Playlist **p)
 
 
 char *getlineCustom(char **buffer, size_t *size) {
-    *buffer = malloc(*size);
-
-    if (*buffer == NULL || buffer == NULL || size == NULL) {
+    if (buffer == NULL || size == NULL) {
         printf("Invalid option\n");
         return NULL;
     }
 
-    size_t len = 0;
-    int inputRead = 0;
-
-    do {
-        // expand buffer if needed
-        if (*size <= 0) {
-            *size = INITIAL_BUFFER_SIZE;
-        }
-        if (len + 2 >= *size) {
-            *size *= EXPANSION_FACTOR;
-            char *temp = realloc(*buffer, *size);
-            if (temp == NULL) {
-                if (*buffer != NULL) {
-                    free(*buffer);
-                    *buffer = NULL;
-                }
-                printf("Invalid option\n");
-                return NULL;
-            }
-            *buffer = temp;
-        }
-
-        inputRead = scanf(" %2047[^\n]", *buffer + len);
-        scanf("%*c");
-
-        // reset buffer content if invalid input or empty buffer
-        // || (*buffer)[0] == '\0'
-        if (inputRead != 1) {
-            if (*buffer != NULL) {
-                free(*buffer);
-                *buffer = NULL;
-            }
+    // allocate initial buffer size if not already done
+    if (*buffer == NULL) {
+        *size = INITIAL_BUFFER_SIZE;
+        *buffer = malloc(*size);
+        if (*buffer == NULL) {
             printf("Invalid option\n");
             return NULL;
         }
-        return *buffer;
+    }
+
+    int inputRead = scanf(" %[^\n]", *buffer);
+    scanf("%*c");
+
+    // check if input
+    if (inputRead != 1 || (*buffer)[0] == '\0') {
+        free(*buffer);
+        *buffer = NULL;
+        printf("Invalid option\n");
+        return NULL;
+    }
+
+    // adjust buffer size, +1 for null terminator
+    size_t newSize = strlen(*buffer) + 1;
+
+    char *temp = realloc(*buffer, newSize);
+    if (temp == NULL) {
+        free(*buffer);
+        *buffer = NULL;
+        printf("Invalid option\n");
+        return NULL;
+    }
+    *buffer = temp;
+    *size = newSize;
+    return *buffer;
+}
+
+// char *getlineCustom(char **buffer, size_t *size) {
+//     *buffer = malloc(*size);
+
+//     if (*buffer == NULL || buffer == NULL || size == NULL) {
+//         printf("Invalid option\n");
+//         return NULL;
+//     }
+
+//     // size_t len = 0;
+//     int inputRead = 0;
+
+//     // do {
+//         // expand buffer if needed
+//         if (*size <= 0) {
+//             *size = INITIAL_BUFFER_SIZE;
+//         }
+//         // if (len + 2 >= *size) {
+//             *size *= EXPANSION_FACTOR;
+//             char *temp = realloc(*buffer, *size - 1);
+//             if (temp == NULL) {
+//                 if (*buffer != NULL) {
+//                     free(*buffer);
+//                     *buffer = NULL;
+//                 }
+//                 printf("Invalid option\n");
+//                 return NULL;
+//             }
+//             *buffer = temp;
+//         // }
+
+//         inputRead = scanf(" %[^\n]", *buffer);
+//         scanf("%*c");
+
+//         // if (inputRead == 1) {
+//         //     len = strlen(*buffer);
+//         // }
+
+//         // reset buffer content if invalid input or empty buffer
+//         // || (*buffer)[0] == '\0'
+//         if (inputRead != 1) {
+//             if (*buffer != NULL) {
+//                 free(*buffer);
+//                 *buffer = NULL;
+//             }
+//             printf("Invalid option\n");
+//             return NULL;
+//         }
+        // return *buffer;
 
         // if (inputRead == 1) {
         //     len += strlen(*buffer + len);
         // }
-
         // // shrink buffer if needed
         // if (len < *size / SHRINK_THRESHOLD_FACTOR && *size > INITIAL_BUFFER_SIZE) {
         //     size_t newSize = len + 1;
@@ -228,10 +273,11 @@ char *getlineCustom(char **buffer, size_t *size) {
         //     }
         //     *buffer = temp;
         // }
-    } while (len == *size - 1);
-    (*buffer)[len] = '\0'; 
-    return *buffer;
-}
+    // } while (len == *size - 1);
+//     (*buffer)[*size - 1] = '\0'; 
+//     // (*buffer)[len] = '\0'; 
+//     return *buffer;
+// }
 
 
 char *strdupCustom(const char *s)
