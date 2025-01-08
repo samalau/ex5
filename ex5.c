@@ -334,6 +334,8 @@ char* readStringInput(const char* prompt) {
 
     do {
         printf("%s", prompt);
+        free(buffer);
+        buffer = NULL;
         if (getlineCustom(&buffer, &size) != NULL && buffer[0] != '\0') {
             validInput = 1;
         } else {
@@ -729,7 +731,7 @@ void delPlaylist(Playlist ***playlistCollected, int *playlistCount, int playlist
 
 void addSong(Song ***songCollected, int *songCount)
 {
-    printf("Enter song's details:\n");
+    printf("Enter song's details\n");
 
     Song *newSong = malloc(sizeof(Song));
     if (newSong == NULL) {
