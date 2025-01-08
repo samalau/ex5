@@ -157,14 +157,9 @@ void freePlaylist(Playlist **p)
 
 
 char *getlineCustom(char **buffer, size_t *size) {
-    if (buffer == NULL || size == NULL) {
-        printf("Invalid option\n");
-        return NULL;
-    }
-    
     *buffer = malloc(*size);
-        
-    if (*buffer == NULL) {
+
+    if (*buffer == NULL || buffer == NULL || size == NULL) {
         printf("Invalid option\n");
         return NULL;
     }
@@ -174,11 +169,11 @@ char *getlineCustom(char **buffer, size_t *size) {
 
     do {
         // expand buffer if needed
-        // if (len + 2 >= *size) {
-            if (*size <= 0) {
-                *size = INITIAL_BUFFER_SIZE;
-            }
-            // *size *= EXPANSION_FACTOR;
+        if (*size <= 0) {
+            *size = INITIAL_BUFFER_SIZE;
+        }
+        if (len + 2 >= *size) {
+            *size *= EXPANSION_FACTOR;
             char *temp = realloc(*buffer, *size);
             if (temp == NULL) {
                 if (*buffer != NULL) {
@@ -189,9 +184,9 @@ char *getlineCustom(char **buffer, size_t *size) {
                 return NULL;
             }
             *buffer = temp;
-        // }
+        }
 
-        inputRead = scanf("%2047[^\n]", *buffer + len);
+        inputRead = scanf(" %2047[^\n]", *buffer + len);
         scanf("%*c");
 
         // reset buffer content if invalid input or empty buffer
@@ -293,7 +288,7 @@ int compareByYear(const void *a, const void *b)
 {
     int yearA = (*(Song **)a)->year;
     int yearB = (*(Song **)b)->year;
-    return (yearA > yearB) - (yearA < yearB);
+    return (yearA - yearB);
 }
 
 
