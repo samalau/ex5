@@ -820,10 +820,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
         switch (chosen) {
             case VIEW: {
                 while ((identity = playlistID(*playlistCollected, *playlistCount)) > INVALID) {
-                    if (
-                        (state = playlistGoTo((*playlistCollected)[identity])) == EOF
-                        || state == BACK
-                    ) {
+                    if ((state = playlistGoTo((*playlistCollected)[identity])) == EOF || state == BACK) {
                         break;
                     }
                 }
@@ -836,7 +833,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
             case DELETE: {
                 if (*playlistCollected != NULL
                     && *playlistCount > 0
-                    && (identity = playlistID(*playlistCollected, *playlistCount)) > EOF
+                    && (identity = playlistID(*playlistCollected, *playlistCount)) > INVALID
                 ) {
                     delPlaylist(playlistCollected, playlistCount, identity);
                 }
