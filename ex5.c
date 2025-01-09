@@ -749,7 +749,7 @@ int playlistGoTo(Playlist *playlist)
             return BACK;
         }
 
-        if (option != 1) {
+        if (option != 1 || chosen < VALID || chosen > BACK) {
             printMenu = 1;
             scanf("%*[^\n]");
             scanf("%*c");
@@ -847,7 +847,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
             return KILL;
         }
 
-        if (option != 1) {
+        if (option != 1 || chosen < VALID || chosen > KILL) {
             chosen = INVALID;
             printMenu = 1;
             scanf("%*[^\n]");
