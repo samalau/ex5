@@ -153,14 +153,26 @@ char *getlineCustom(char **buffer, size_t *size) {
         return NULL;
     }
 
-    if (*buffer == NULL) {
-        *size = INITIAL_BUFFER_SIZE;
-        *buffer = malloc(*size);
-        if (*buffer == NULL) {
-            printf("Invalid option\n");
-            return NULL;
-        }
+    // reset buffer
+    if (*buffer) {
+        free(*buffer);
+        *buffer = NULL;
     }
+    *size = INITIAL_BUFFER_SIZE;
+    *buffer = malloc(*size);
+    if (*buffer == NULL) {
+        printf("Invalid option\n");
+        return NULL;
+    }
+
+    // if (*buffer == NULL) {
+    //     *size = INITIAL_BUFFER_SIZE;
+    //     *buffer = malloc(*size);
+    //     if (*buffer == NULL) {
+    //         printf("Invalid option\n");
+    //         return NULL;
+    //     }
+    // }
 
     size_t len = 0;
     int inputRead;
