@@ -728,6 +728,7 @@ int playlistGoTo(Playlist *playlist)
     printf("playlist %s:\n", playlistCurrent->name);
 
     do {
+        chosen = BACK + 1;
         if (printMenu) {
             printf(
                 "%d. Show Playlist\n"
@@ -741,6 +742,8 @@ int playlistGoTo(Playlist *playlist)
         }
         option = scanf(" %d", &chosen);
 
+        printf("Scanf returned: %d, Chosen: %d\n", option, chosen); 
+
         if (option == EOF) {
             return EOF;
         }
@@ -749,7 +752,7 @@ int playlistGoTo(Playlist *playlist)
             return BACK;
         }
 
-        if (option != 1 || chosen < VALID || chosen > BACK) {
+        if (option != 1) {
             printMenu = 1;
             scanf("%*[^\n]");
             scanf("%*c");
@@ -830,6 +833,7 @@ int home(Playlist ***playlistCollected, int *playlistCount)
         printMenu = 1;
 
     do {
+        chosen = KILL + 1;
         if (printMenu) {
             printf(
                 "Please Choose:\n"
@@ -842,6 +846,8 @@ int home(Playlist ***playlistCollected, int *playlistCount)
         }
 
         option = scanf(" %d", &chosen);
+
+        printf("Scanf returned: %d, Chosen: %d\n", option, chosen); 
 
         if (option == EOF || chosen == KILL) {
             return KILL;
@@ -872,7 +878,11 @@ int home(Playlist ***playlistCollected, int *playlistCount)
                 break;
             }
             case ADD: {
-                addPlaylist(playlistCollected, playlistCount);
+                int prevCount = *playlistCount;
+                int confirm = prevCount + 1;
+                while (*playlistCount < confirm) {
+                    addPlaylist(playlistCollected, playlistCount);
+                }
                 break;
             }
             case DELETE: {
@@ -919,5 +929,3 @@ int main()
     printf("Goodbye!\n");
     return 0;
 }
-
-// TODO: enumerate macros if have time
