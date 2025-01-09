@@ -478,7 +478,8 @@ int songSelect(char action[], int songCount)
             return (QUIT - 2);
         }
 
-        if (input == 0 || chosen < QUIT || chosen > songCount) {
+        if (input != 1 || chosen < QUIT || chosen > songCount) {
+            chosen = INVALID;
             scanf("%*[^\n]");
             scanf("%*c");
             printf("Invalid option\n");
