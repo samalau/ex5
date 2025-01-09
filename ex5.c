@@ -462,7 +462,7 @@ void songID(Song **songCollected, int songCount)
 int songSelect(char action[], int songCount)
 {
     int
-        chosen = QUIT,
+        chosen = INVALID,
         input = INVALID;
     
     do {
@@ -743,8 +743,6 @@ int playlistGoTo(Playlist *playlist)
         }
         option = scanf(" %d", &chosen);
 
-        printf("Scanf returned: %d, Chosen: %d\n", option, chosen); 
-
         if (option == EOF) {
             return EOF;
         }
@@ -788,6 +786,7 @@ int playlistGoTo(Playlist *playlist)
                 if ((identity = songSelect("delete", playlistCurrent->songsNum)) == EOF) {
                     return EOF;
                 }
+
                 if (identity > EOF) {
                     delSong(&playlistCurrent->songs, &playlistCurrent->songsNum, identity);
                     printf("Song deleted successfully.\n");
@@ -847,8 +846,6 @@ int home(Playlist ***playlistCollected, int *playlistCount)
         }
 
         option = scanf(" %d", &chosen);
-
-        printf("Scanf returned: %d, Chosen: %d\n", option, chosen); 
 
         if (option == EOF || chosen == KILL) {
             return KILL;
@@ -930,3 +927,5 @@ int main()
     printf("Goodbye!\n");
     return 0;
 }
+
+// :_)
