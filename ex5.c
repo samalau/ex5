@@ -1,6 +1,6 @@
 /******************
 Name: Samantha Newmark
-ID: 346587629
+ID: ---------
 Assignment: ex5
 *******************/
 #include <stdio.h>
